@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LG화학 대산공장 사내 길 안내 시스템</title>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/dist/Leaflet.GoogleMutant.js"></script>
 
 <style>
 :root {
@@ -79,7 +81,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* 🛑 [순서 고정 1 - 최상단 배치] 속도 제한 및 안전 수칙 설명 배너 */
+/* 🛑 [순서 고정 1 - 최상단] 속도 제한 및 안전 수칙 설명 배너 */
 .info-banner {
     background: #fff9db;
     border-left: 5px solid #fab005;
@@ -111,7 +113,21 @@ body {
     font-weight: bold;
 }
 
-/* 📸 [순서 고정 2 - 중간 배치] 실시간 교차로 매칭 사진 및 안내 카드 */
+/* 📟 상단 실시간 GPS 관제 전광판 대시보드 */
+.dashboard {
+    background: #212529;
+    color: #2b8a3e;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* 📸 [순서 고정 2 - 중간 배치] 실시간 교차로 매칭 가이드 카드 */
 .guide-card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -159,7 +175,7 @@ body {
     margin: 0 0 15px 0;
 }
 
-/* 📞 담당자 핫라인 즉시 전화걸기 버튼 스타일 */
+/* 📞 담당자 즉시 전화걸기 버튼 링크 */
 .call-btn {
     display: flex;
     align-items: center;
@@ -180,7 +196,7 @@ body {
     background: #c3fae8;
 }
 
-/* 🗺️ [순서 고정 3 - 최하단 배치] 순정 구글 지도 인터페이스 구역 */
+/* 🗺️ [순서 고정 3 - 최하단 배치] 리플렛 실물 지도 레이아웃 */
 .map-wrapper {
     background: var(--card-bg);
     border-radius: 16px;
@@ -197,7 +213,6 @@ body {
     height: 420px;
 }
 
-/* 내 위치 재조정 버튼 */
 .gps-refresh-btn {
     position: absolute;
     bottom: 20px;
@@ -214,8 +229,20 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    z-index: 10;
+    z-index: 1000;
     transition: all 0.2s;
+}
+
+/* 📌 리플렛 핀 라벨 디자인용 스타일시트 정의 */
+.custom-marker-label {
+    background: #ffffff;
+    border: 1.5px solid #c2185b;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-weight: bold;
+    color: #c2185b;
+    font-size: 11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 </style>
 </head>
@@ -245,6 +272,12 @@ body {
         <p>• 운행 중 문의 사항은 아래 가이드 카드의 전화 버튼을 누르시면 물류 담당자와 바로 연결됩니다.</p>
     </div>
 
+    <div id="dashBoard" class="dashboard" style="display: none;">
+        📡 내비게이션 관제 시스템 가동 중...<br>
+        📍 현재 좌표: <span id="dashCoords" style="color: #69db7c;">GPS 수신 대기 중</span><br>
+        🎯 다음 거점: [<span id="dashNextName" style="color: #ff8787;">-</span>]까지 남은 거리: <span id="dashDist" style="color: #ffd43b;">0m</span>
+    </div>
+
     <div id="guideCard" class="guide-card">
         <h4 id="guideTitle">📌 주요 갈림길 운행 가이드</h4>
         <div class="guide-img-box">
@@ -265,14 +298,15 @@ body {
 </div>
 
 <script>
-let map;
-let userMarker;
+let map = null;
+let userMarker = null;
 let watchId = null;
 let currentStageIndex = 0;
 let routeStages = [];
 let polylinePath = null;
+let markerLayerGroup = null;
 
-// 🗺️ 구글 지도 엔진을 위해 아스팔트 주행 실제 곡선 선형에 맞게 맵핑한 위도·경도 좌표 셋
+// 🗺️ 리플렛 지도용 세부 곡선 도로 궤적 및 거점 마커 데이터
 const factoryData = {
     'PO': {
         stages: [
@@ -282,25 +316,26 @@ const factoryData = {
             { name: "(우회전) 구간", lat: 36.9984565, lon: 126.3791392, radius: 40, speedLimit: "20km", nextTitle: "🛑 4단계: 물류 구역 창고 직전 [좌회전] 준비", nextText: "물류 구역 우회전 코너를 돌아 노면을 따라 진입 중입니다. 시속 20km 이하 속도를 철저히 유지하시고 창고 직전 갈림길에서 **좌회전** 할 준비를 하세요.", nextImg: "turn_left.png" },
             { name: "PO창고 (도착)", lat: 36.9989486, lon: 126.3841774, radius: 50, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "좌회전 진입 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 요원의 수신호에 맞춰 서행 진입해 주세요.", nextImg: "arrival.png" }
         ],
-        // 🛠️ 직선이 아니라 실제 도로 모양을 따라 부드러운 곡선으로 매칭되도록 정밀 추출한 패스 좌표 배열
+        // 🛠️ [직선 제거!] 구부러지는 아스팔트 주행 구간마다 위도·경도를 촘촘하게 연결해둔 도로 라인 좌표
         roadPath: [
-            {lat: 36.9925492, lng: 126.3695483},
-            {lat: 36.9931000, lng: 126.3712000},
-            {lat: 36.9938500, lng: 126.3731000},
-            {lat: 36.9944902, lng: 126.3745901}, // 방재실 코너
-            {lat: 36.9952000, lng: 126.3762000},
-            {lat: 36.9961000, lng: 126.3783000},
-            {lat: 36.9967810, lng: 126.3799103}, // 미래기술관 교차로
-            {lat: 36.9975000, lng: 126.3796000},
-            {lat: 36.9984565, lng: 126.3791392}, // 우회전 포인트
-            {lat: 36.9986500, lng: 126.3815000},
-            {lat: 36.9988500, lng: 126.3832000},
-            {lat: 36.9989486, lng: 126.3841774}  // PO창고 하차장
+            [36.9925492, 126.3695483], // 서문
+            [36.9928000, 126.3703000], 
+            [36.9934000, 126.3721000],
+            [36.9940000, 126.3737000],
+            [36.9944902, 126.3745901], // 방재실 사거리
+            [36.9950000, 126.3758000], 
+            [36.9958000, 126.3778000],
+            [36.9964000, 126.3791000],
+            [36.9967810, 126.3799103], // 미래기술관 교차로
+            [36.9974000, 126.3796500], 
+            [36.9984565, 126.3791392], // 우회전
+            [36.9986000, 126.3810000], 
+            [36.9988000, 126.3828000],
+            [36.9989486, 126.3841774]  // PO창고
         ]
     }
 };
 
-// 🏢 목적지 공장 스위칭 및 지도 직접 렌더링 엔진
 function selectFactory(code) {
     const buttons = document.querySelectorAll('.factory-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
@@ -312,6 +347,7 @@ function selectFactory(code) {
     currentStageIndex = 0;
     routeStages = data.stages;
 
+    document.getElementById('dashBoard').style.display = 'block';
     const firstGuide = routeStages[0];
     document.getElementById('guideTitle').innerText = "🏁 안내 시작: " + firstGuide.name;
     document.getElementById('guideText').innerHTML = firstGuide.nextText;
@@ -320,54 +356,48 @@ function selectFactory(code) {
 
     document.getElementById('mapWrapper').style.display = 'block';
 
-    // 🗺️ iframe 통째로 걷어내고 순정 구글 지도로 레이어 렌더링
-    const mapOptions = {
-        center: { lat: 36.9955, lng: 126.3765 },
-        zoom: 15,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        disableDefaultUI: true,
-        zoomControl: true
-    };
+    if (map !== null) {
+        map.remove();
+        map = null;
+    }
     
-    map = new google.maps.Map(document.getElementById('map'), mapOptions);
-
-    // 실제 도로 모양에 딱 맞추어 파란색 주행선 드로잉
-    if (polylinePath) polylinePath.setMap(null);
-    polylinePath = new google.maps.Polyline({
-        path: data.roadPath,
-        geodesic: true,
-        strokeColor: '#00acc1',
-        strokeOpacity: 0.85,
-        strokeWeight: 6
+    map = L.map('map', {
+        center: [36.9955, 126.3765],
+        zoom: 15,
+        zoomControl: true,
+        attributionControl: true
     });
-    polylinePath.setMap(map);
 
-    // 📌 [라벨 상시 노출 기술] 클릭 안 해도 각 거점 이름이 지도 위에 글자로 항상 떠 있도록 셋업
+    // 🎯 [일반 지도로 고정] 위성 뷰어를 빼고 깔끔하게 눈이 편한 일반 도로 지도 레이어로 생성합니다.
+    L.gridLayer.googleMutant({
+        type: 'roadmap'
+    }).addTo(map);
+
+    // 🛠️ 촘촘해진 roadPath 궤적을 실선으로 이어 부드러운 아스팔트 주행 경로를 표출합니다.
+    if (polylinePath) map.removeLayer(polylinePath);
+    polylinePath = L.polyline(data.roadPath, {
+        color: '#00acc1',
+        weight: 6,
+        opacity: 0.85
+    }).addTo(map);
+
+    // 📌 [라벨 상시 노출] 클릭 안 해도 각 거점 이름 이름표가 지도 위에 둥둥 떠서 뜨도록 셋업 완료
+    if (markerLayerGroup) map.removeLayer(markerLayerGroup);
+    markerLayerGroup = L.layerGroup().addTo(map);
+
     routeStages.forEach((stage) => {
-        new google.maps.Marker({
-            position: { lat: stage.lat, lng: stage.lon },
-            map: map,
-            label: {
-                text: stage.name,
-                color: '#c2185b',
-                fontWeight: 'bold',
-                fontSize: '12px'
-            },
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 5,
-                fillColor: '#c2185b',
-                fillOpacity: 1,
-                strokeWeight: 1
-            }
-        });
+        let marker = L.marker([stage.lat, stage.lon]).addTo(markerLayerGroup);
+        marker.bindTooltip(stage.name, {
+            permanent: true,
+            direction: 'top',
+            className: 'custom-marker-label'
+        }).openTooltip();
     });
 
     startTracking();
     document.getElementById('guideCard').scrollIntoView({ behavior: 'smooth' });
 }
 
-// 🛰️ 내 위치 실시간 파란 점 동기화 및 구간 속도 스위칭 엔진
 function startTracking() {
     if (watchId) navigator.geolocation.clearWatch(watchId);
 
@@ -375,35 +405,32 @@ function startTracking() {
         watchId = navigator.geolocation.watchPosition(function(position) {
             const userLat = position.coords.latitude;
             const userLon = position.coords.longitude;
-            const userLatLng = new google.maps.LatLng(userLat, userLon);
 
-            // 실시간 내 위치 파란 점 생성 및 포지션 마커 이동
+            document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
+
+            // 기사님 실시간 파란 점 동기화
             if (!userMarker) {
-                userMarker = new google.maps.Marker({
-                    position: userLatLng,
-                    map: map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 8,
-                        fillColor: '#228be6',
-                        fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 2
-                    }
-                });
+                userMarker = L.circleMarker([userLat, userLon], {
+                    radius: 8,
+                    fillColor: '#228be6',
+                    fillOpacity: 1,
+                    color: '#ffffff',
+                    weight: 2
+                }).addTo(map);
             } else {
-                userMarker.setPosition(userLatLng);
+                userMarker.setLatLng([userLat, userLon]);
             }
 
             if (routeStages.length === 0 || currentStageIndex >= routeStages.length) return;
 
             const currentTarget = routeStages[currentStageIndex];
-            const targetLatLng = new google.maps.LatLng(currentTarget.lat, currentTarget.lon);
-            
-            // 실제 기사님의 GPS 좌표와 거점 중심점 사이의 3D 공간 거리 계산
-            const distance = google.maps.geometry.spherical.computeDistanceBetween(userLatLng, targetLatLng);
+            const userLatLng = L.latLng(userLat, userLon);
+            const targetLatLng = L.latLng(currentTarget.lat, currentTarget.lon);
+            const distance = userLatLng.distanceTo(targetLatLng);
 
-            // 오차 반경 진입 시 하단 가이드 카드 및 제한속도 알림창 동시 매칭 새로고침
+            document.getElementById('dashNextName').innerText = currentTarget.name;
+            document.getElementById('dashDist').innerText = Math.round(distance) + "m";
+
             if (distance <= currentTarget.radius) {
                 currentStageIndex++;
 
@@ -413,7 +440,6 @@ function startTracking() {
                     document.getElementById('guideText').innerHTML = nextGuide.nextText;
                     document.getElementById('guideImg').src = nextGuide.nextImg;
                     
-                    // 미래기술관 통과 여부에 맞춰 상단 전광판 속도 실시간 제어
                     if (nextGuide.speedLimit === "20km") {
                         document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정/물류 구역 절대 서행)";
                         document.getElementById('currentSpeedLimit').style.color = "#c2185b";
@@ -426,10 +452,11 @@ function startTracking() {
                     document.getElementById('guideTitle').innerText = "🏁 PO창고(도착) 최종 도킹 완료";
                     document.getElementById('guideText').innerHTML = "안전하게 하차 공간 매칭 지점에 도달했습니다. 안내를 종료합니다. 수고하셨습니다!";
                     document.getElementById('currentSpeedLimit').innerText = "최종 목적지 도착 완료";
+                    document.getElementById('currentSpeedLimit').style.color = "#00acc1";
                 }
             }
         }, function(error) {
-            console.error("GPS 레이더 신호 수신 지연:", error);
+            console.error("GPS 관제 신호 장애:", error);
         }, {
             enableHighAccuracy: true,
             maximumAge: 0,
@@ -438,20 +465,19 @@ function startTracking() {
     }
 }
 
-// GPS 수신 리프레시 수동 조작계
 function retrackLocation() {
     if (watchId) {
         navigator.geolocation.clearWatch(watchId);
-        userMarker = null;
+        if (userMarker) {
+            map.removeLayer(userMarker);
+            userMarker = null;
+        }
         setTimeout(function() {
             startTracking();
-            alert("🗺️ 실시간 구글 위성 GPS 수신 상태를 정상화했습니다.");
+            alert("🗺️ 실시간 위성 GPS 수신 상태를 원형 복원했습니다.");
         }, 300);
     } else {
-        alert("목적지 공장을 먼저 선택하셔야 내 위치 조율이 가능합니다.");
+        alert("목적지 공장을 먼저 선택하셔야 GPS 조율이 가동됩니다.");
     }
 }
 </script>
-
-</body>
-</html>
