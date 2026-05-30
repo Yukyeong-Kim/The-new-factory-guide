@@ -91,9 +91,6 @@ body {
     font-size: 0.85rem;
 }
 
-.info-banner h3 { margin: 0 0 6px 0; color: #f59f00; font-size: 0.95rem; }
-.info-banner p { margin: 4px 0; color: #555; }
-
 .map-container {
     position: relative;
     width: 100%;
@@ -111,6 +108,20 @@ iframe {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+/* 🧭 실시간 파란점 내비 앱 강제 호출 단추 */
+.nav-launcher-btn {
+    display: block;
+    background: #00acc1;
+    color: white;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 172, 193, 0.3);
 }
 
 .guide-card {
@@ -154,20 +165,6 @@ iframe {
     padding: 10px;
     border-radius: 8px;
 }
-
-.external-map-btn {
-    display: block;
-    background: #4285F4;
-    color: white;
-    text-decoration: none;
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 0.95rem;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3);
-}
 </style>
 </head>
 
@@ -195,6 +192,8 @@ iframe {
         <p>• 하차 공간 진입 전 비상등 점등 및 단지 내 지게차 절대 주의</p>
     </div>
 
+    <a id="navLauncher" class="nav-launcher-btn" href="#" target="_blank" style="display:none;">🧭 실시간 파란점 내비게이션 열기</a>
+
     <div id="mapContainer" class="map-container">
         <iframe id="mapFrame" src="" allow="geolocation *;"></iframe>
     </div>
@@ -205,8 +204,6 @@ iframe {
             <img id="guideImg" src="" alt="갈림길 안내">
         </div>
         <p id="guideText" class="guide-text">목적지를 선택하면 상세 교차로 가이드가 표시됩니다.</p>
-        
-        <a id="externalMapLink" class="external-map-btn" href="#" target="_blank">🗺️ 원본 구글 지도 앱으로 열기</a>
     </div>
 
 </div>
@@ -218,7 +215,7 @@ let watchId = null;
 
 const factoryData = {
     'PO': {
-        // 💡 [수정 완료] 404 에러를 내던 가짜 도메인을 제거하고, 진짜 구글 마이맵 임베드 보안 주소(https) 및 파란 점 복원 옵션(&wp=1)을 정확히 결합했습니다.
+        // 복원 완료된 완벽한 마이맵 및 구글 지도 앱 연동 주소 체계
         mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&ehbc=2E312F&wp=1",
         appUrl: "https://www.google.com/maps/d/viewer?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E",
         stages: [
@@ -286,11 +283,15 @@ function selectFactory(code) {
         routeStages = data.stages;
 
         document.getElementById('mapFrame').src = data.mapUrl;
-        document.getElementById('externalMapLink').href = data.appUrl;
+        
+        // 🧭 상단 내비 앱 링크 주소 매칭 및 버튼 활성화
+        const launcher = document.getElementById('navLauncher');
+        launcher.href = data.appUrl;
+        launcher.style.display = 'block';
+        
         document.getElementById('mapContainer').style.display = 'block';
         document.getElementById('statusDashboard').style.display = 'block';
 
-        // 💡 [최종 치트키] 앱이 켜지자마자 현재 기사님의 폰 GPS 위치와 가장 가까운 거점을 찾아 순간이동시킵니다.
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 const uLat = position.coords.latitude;
@@ -307,12 +308,10 @@ function selectFactory(code) {
                     }
                 });
                 
-                // 가장 가까운 구간 인덱스로 강제 매칭 후 UI 초기 가동
                 currentStageIndex = closestIndex;
                 renderCurrentStage();
                 activateTracking();
             }, function() {
-                // GPS 오류 시 기본 0번부터 시작
                 currentStageIndex = 0;
                 renderCurrentStage();
                 activateTracking();
@@ -366,7 +365,7 @@ function activateTracking() {
                     renderCurrentStage();
                 } else {
                     document.getElementById('guideTitle').innerText = "🏁 PO 출하 창고 도착 완료";
-                    document.getElementById('guideText').innerHTML = "안전하게 목적지에 도달했습니다. 운행을 종료합니다.";
+                    document.getElementById('guideText').innerHTML = "안전하게 목적지에 도달했습니다. 안내를 종료합니다.";
                 }
             }
         }, function(error) {
