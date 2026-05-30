@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>통합 사내 차량 길안내 시스템</title>
+<title>LG화학 대산공장 사내 길 안내 시스템</title>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry"></script>
 
@@ -221,7 +221,7 @@ body {
 
 <body>
 
-<div class="header">🏭 공장 내부 차량 길안내 시스템</div>
+<div class="header">🏭 LG화학 대산공장 사내 길 안내 시스템</div>
 
 <div class="container">
     
@@ -271,7 +271,7 @@ let currentStageIndex = 0;
 let routeStages = [];
 let polylinePath = null;
 
-// 🗺️ 아스팔트 주행 실제 곡선 도로 좌표 및 내비게이션 데이터 세드
+// 🗺️ 아스팔트 주행 실제 곡선 도로 좌표 및 내비게이션 데이터 세팅
 const factoryData = {
     'PO': {
         stages: [
@@ -396,7 +396,6 @@ function startTracking() {
             const targetLatLng = new google.maps.LatLng(currentTarget.lat, currentTarget.lon);
             const distance = google.maps.geometry.spherical.computeDistanceBetween(userLatLng, targetLatLng);
 
-            // 실제 차량이 거점 반경에 걸쳐 허들을 넘었을 때 카드 및 전광판 정보 체인지
             if (distance <= currentTarget.radius) {
                 currentStageIndex++;
 
@@ -406,7 +405,6 @@ function startTracking() {
                     document.getElementById('guideText').innerHTML = nextGuide.nextText;
                     document.getElementById('guideImg').src = nextGuide.nextImg;
                     
-                    // 💡 기사님 위치가 미래기술관을 넘어서 공정/물류 구역에 골인하면 상단 속도 배너 실시간 대폭 하향 처리
                     if (nextGuide.speedLimit === "20km") {
                         document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정/물류 구역 절대 서행)";
                         document.getElementById('currentSpeedLimit').style.color = "#c2185b";
