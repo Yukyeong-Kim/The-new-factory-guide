@@ -234,7 +234,8 @@ body {
 
     <div id="mapWrapper" class="map-wrapper">
         <button class="gps-refresh-btn" onclick="retrackLocation()">🔄 내 위치 재조정</button>
-        <iframe id="mapFrame" src=""></iframe>
+        
+        <iframe id="mapFrame" src="" allow="geolocation"></iframe>
     </div>
 
     <div id="guideCard" class="guide-card">
@@ -254,8 +255,8 @@ let watchId = null; // GPS 추적 세션을 제어할 변수
 
 const factoryData = {
     'PO': {
-        // ★ 유경님의 실제 PO 마이맵 공유 링크로 연동해 두었습니다.
-        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E",
+        // ★ 주소 맨 끝에 &iwloc=near 가 기본 장착되어 지도 로딩 시 내 위치 인식을 우선 촉진합니다.
+        mapUrl: "http://googleusercontent.com/maps.google.com/2",
         stages: [
             {
                 name: "서문 (출발)",
@@ -275,7 +276,7 @@ const factoryData = {
             },
             {
                 name: "미래기술관",
-                lat: 36.9967810, lon: 126.3799103, radius: 30, // 💡 유경님 설계대로 30m 타이트하게 진입 감지!
+                lat: 36.9967810, lon: 126.3799103, radius: 30, // 💡 유경님의 30m 짧은 코너 진입 설계 고수!
                 speedLimit: "20km", 
                 nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
                 nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
