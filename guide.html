@@ -215,7 +215,6 @@ body {
 
 <div class="container">
     
-    <!-- 1단계: 도착지 선택 대시보드 -->
     <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666;">📍 목적지 공장을 골라주세요</p>
     <div class="factory-grid">
         <button class="factory-btn" onclick="selectFactory('PO')"><span>📦</span>PO 공장</button>
@@ -226,7 +225,6 @@ body {
         <button class="factory-btn" onclick="selectFactory('POE')"><span>🛡️</span>POE 공장</button>
     </div>
 
-    <!-- 2단계: 안전 수칙 배너 (현재 구간에 따라 제한속도가 시속 35km -> 20km로 자동 스위칭) -->
     <div class="info-banner">
         <h3>⚠️ 단지 내 운행 안전 수칙</h3>
         <p id="speedNotice">• 현재 구간 규정 속도: <span id="currentSpeedLimit" class="speed-badge">시속 35km 이하</span> 서행 준수</p>
@@ -234,14 +232,11 @@ body {
         <p>• 길을 잃거나 이상 발생 시 즉시 문의: 📞 <a href="tel:010-1234-5678">010-1234-5678</a></p>
     </div>
 
-    <!-- 3단계: 구글 마이맵 지도 영역 -->
     <div id="mapWrapper" class="map-wrapper">
-        <!-- 🎯 지도 내부 GPS 위치 재조정 버튼 -->
         <button class="gps-refresh-btn" onclick="retrackLocation()">🔄 내 위치 재조정</button>
         <iframe id="mapFrame" src="" allow="geolocation"></iframe>
     </div>
 
-    <!-- 4단계: 주요 갈림길 실물 가이드 이미지 안내 -->
     <div id="guideCard" class="guide-card">
         <h4 id="guideTitle">📌 주요 갈림길 운행 가이드</h4>
         <div class="guide-img-box">
@@ -259,8 +254,8 @@ let watchId = null;
 
 const factoryData = {
     'PO': {
-        // 💡 [유경님 진짜 마이맵 주소 완벽 복원] 위치 매칭 코드(&iwloc=near) 연동 완료
-        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&iwloc=near",
+        // 💡 [최종 수정] 주소 끝에 &wp=1 을 강제 수급하여 홈페이지 내장 지도 상태에서도 내 위치 추적 모드를 온전히 켭니다.
+        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&iwloc=near&wp=1",
         stages: [
             {
                 name: "서문 (출발)",
@@ -280,7 +275,7 @@ const factoryData = {
             },
             {
                 name: "미래기술관",
-                lat: 36.9967810, lon: 126.3799103, radius: 30, // 유경님 의도대로 30m 유지
+                lat: 36.9967810, lon: 126.3799103, radius: 30, // 💡 유경님의 30m 짧은 교차로 안전 진입 조건 고수
                 speedLimit: "20km", 
                 nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
                 nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
@@ -312,9 +307,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c; 
 }
 
@@ -334,6 +327,7 @@ function selectFactory(code) {
         mapFrame.src = data.mapUrl;
         document.getElementById('mapWrapper').style.display = 'block';
 
+        // 첫 번째 출발 안내 및 기본 속도(35km) 설정
         const firstGuide = routeStages[0];
         document.getElementById('guideTitle').innerText = "🏁 출발 안내: " + firstGuide.name;
         document.getElementById('guideText').innerHTML = firstGuide.nextText;
@@ -343,7 +337,9 @@ function selectFactory(code) {
         document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
         document.getElementById('currentSpeedLimit').style.color = "#d9480f";
 
+        // GPS 추적 레이더 시동
         startTracking();
+        
         document.getElementById('mapWrapper').scrollIntoView({ behavior: 'smooth' });
     } else {
         alert(code + " 공장의 상세 경로 데이터가 등록되지 않았습니다.");
@@ -364,6 +360,7 @@ function startTracking() {
             const currentTarget = routeStages[currentStageIndex];
             const distance = getDistance(userLat, userLon, currentTarget.lat, currentTarget.lon);
 
+            // 🎯 설정한 반경 원 안으로 '진입(<=)'하는 순간 교체
             if (distance <= currentTarget.radius) {
                 currentStageIndex++; 
 
@@ -399,6 +396,7 @@ function startTracking() {
     }
 }
 
+// 🎯 내 위치 강제 리프레시 엔진
 function retrackLocation() {
     const mapFrame = document.getElementById('mapFrame');
     const currentSrc = mapFrame.src;
