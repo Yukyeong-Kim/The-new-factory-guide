@@ -234,7 +234,7 @@ body {
 
     <div id="mapWrapper" class="map-wrapper">
         <button class="gps-refresh-btn" onclick="retrackLocation()">🔄 내 위치 재조정</button>
-        <iframe id="mapFrame" src="" allow="geolocation"></iframe>
+        <iframe id="mapFrame" src="" allow="geolocation; accelerometer; gyroscope"></iframe>
     </div>
 
     <div id="guideCard" class="guide-card">
@@ -254,7 +254,8 @@ let watchId = null;
 
 const factoryData = {
     'PO': {
-        mapUrl: "https://www.google.com/maps/d/u/0/embed?mid=1L0O4zG9Z-Y9xYV0M3N1_a8F9B6G_f2E&ehbc=2E312F&iwloc=near&wp=1",
+        // 💡 [완벽 복원 및 세팅] 유경님의 진짜 마이맵 ID를 복구하고 전체 이동 경로를 보여주는 기본 뷰 모드에 파란 점 강제 코드(&wp=1)만 딱 깔끔하게 결합했습니다.
+        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&wp=1",
         stages: [
             {
                 name: "서문 (출발)",
@@ -300,7 +301,7 @@ const factoryData = {
     }
 };
 
-// 🎯 [수정 완결] 문법 에러를 유발하던 수식 꼬임 현상을 100% 완벽하게 수정했습니다.
+// 하버사인 거리 계산 함수
 function getDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
