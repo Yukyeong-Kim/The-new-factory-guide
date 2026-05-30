@@ -81,7 +81,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* 🛑 [순서 고정 1 - 최상단] 속도 제한 및 안전 수칙 설명 배너 */
+/* 🛑 [순서 고정 ① - 최상단] 속도 제한 및 안전 수칙 설명 배너 */
 .info-banner {
     background: #fff9db;
     border-left: 5px solid #fab005;
@@ -127,7 +127,7 @@ body {
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
 }
 
-/* 📸 [순서 고정 2 - 중간 배치] 실시간 교차로 매칭 가이드 카드 */
+/* 📸 [순서 고정 ② - 중간 배치] 실시간 교차로 매칭 가이드 카드 */
 .guide-card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -196,7 +196,7 @@ body {
     background: #c3fae8;
 }
 
-/* 🗺️ [순서 고정 3 - 최하단 배치] 리플렛 실물 지도 레이아웃 */
+/* 🗺️ [순서 고정 ③ - 최하단 배치] 리플렛 실물 지도 레이아웃 */
 .map-wrapper {
     background: var(--card-bg);
     border-radius: 16px;
@@ -231,18 +231,6 @@ body {
     gap: 6px;
     z-index: 1000;
     transition: all 0.2s;
-}
-
-/* 📌 리플렛 핀 라벨 디자인용 스타일시트 정의 */
-.custom-marker-label {
-    background: #ffffff;
-    border: 1.5px solid #c2185b;
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-weight: bold;
-    color: #c2185b;
-    font-size: 11px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 </style>
 </head>
@@ -306,7 +294,7 @@ let routeStages = [];
 let polylinePath = null;
 let markerLayerGroup = null;
 
-// 🗺️ 리플렛 지도용 세부 곡선 도로 궤적 및 거점 마커 데이터
+// 🗺️ 리플렛 지도 전용 곡선 도로 선형 및 거점 데이터 마스터 서랍장
 const factoryData = {
     'PO': {
         stages: [
@@ -316,20 +304,20 @@ const factoryData = {
             { name: "(우회전) 구간", lat: 36.9984565, lon: 126.3791392, radius: 40, speedLimit: "20km", nextTitle: "🛑 4단계: 물류 구역 창고 직전 [좌회전] 준비", nextText: "물류 구역 우회전 코너를 돌아 노면을 따라 진입 중입니다. 시속 20km 이하 속도를 철저히 유지하시고 창고 직전 갈림길에서 **좌회전** 할 준비를 하세요.", nextImg: "turn_left.png" },
             { name: "PO창고 (도착)", lat: 36.9989486, lon: 126.3841774, radius: 50, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "좌회전 진입 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 요원의 수신호에 맞춰 서행 진입해 주세요.", nextImg: "arrival.png" }
         ],
-        // 🛠️ [직선 제거!] 구부러지는 아스팔트 주행 구간마다 위도·경도를 촘촘하게 연결해둔 도로 라인 좌표
+        // 🛠️ 실제 대산공장 노면을 따라 완벽한 곡선으로 매핑해둔 도로 패스
         roadPath: [
-            [36.9925492, 126.3695483], // 서문
-            [36.9928000, 126.3703000], 
+            [36.9925492, 126.3695483],
+            [36.9928000, 126.3703000],
             [36.9934000, 126.3721000],
             [36.9940000, 126.3737000],
-            [36.9944902, 126.3745901], // 방재실 사거리
-            [36.9950000, 126.3758000], 
+            [36.9944902, 126.3745901], // 방재실
+            [36.9950000, 126.3758000],
             [36.9958000, 126.3778000],
             [36.9964000, 126.3791000],
-            [36.9967810, 126.3799103], // 미래기술관 교차로
-            [36.9974000, 126.3796500], 
+            [36.9967810, 126.3799103], // 미래기술관
+            [36.9974000, 126.3796500],
             [36.9984565, 126.3791392], // 우회전
-            [36.9986000, 126.3810000], 
+            [36.9986000, 126.3810000],
             [36.9988000, 126.3828000],
             [36.9989486, 126.3841774]  // PO창고
         ]
@@ -368,12 +356,12 @@ function selectFactory(code) {
         attributionControl: true
     });
 
-    // 🎯 [일반 지도로 고정] 위성 뷰어를 빼고 깔끔하게 눈이 편한 일반 도로 지도 레이어로 생성합니다.
+    // 🎯 [일반 지도 출력 고정] 깔끔한 도로 중심의 일반 지도 테마 호출
     L.gridLayer.googleMutant({
         type: 'roadmap'
     }).addTo(map);
 
-    // 🛠️ 촘촘해진 roadPath 궤적을 실선으로 이어 부드러운 아스팔트 주행 경로를 표출합니다.
+    // 🛠️ 매끄러운 곡선 주행선 드로잉
     if (polylinePath) map.removeLayer(polylinePath);
     polylinePath = L.polyline(data.roadPath, {
         color: '#00acc1',
@@ -381,7 +369,7 @@ function selectFactory(code) {
         opacity: 0.85
     }).addTo(map);
 
-    // 📌 [라벨 상시 노출] 클릭 안 해도 각 거점 이름 이름표가 지도 위에 둥둥 떠서 뜨도록 셋업 완료
+    // 📌 [라벨 상시 노출 복원] 핀 옆에 이름표가 무조건 뜨도록 고정
     if (markerLayerGroup) map.removeLayer(markerLayerGroup);
     markerLayerGroup = L.layerGroup().addTo(map);
 
@@ -408,7 +396,6 @@ function startTracking() {
 
             document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
 
-            // 기사님 실시간 파란 점 동기화
             if (!userMarker) {
                 userMarker = L.circleMarker([userLat, userLon], {
                     radius: 8,
@@ -481,3 +468,19 @@ function retrackLocation() {
     }
 }
 </script>
+
+<style>
+.custom-marker-label {
+    background: #ffffff;
+    border: 1.5px solid #c2185b;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-weight: bold;
+    color: #c2185b;
+    font-size: 11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+</style>
+
+</body>
+</html>
