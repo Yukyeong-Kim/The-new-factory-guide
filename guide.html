@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>통합 사내 차량 길안내 시스템</title>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
 :root {
     --primary-color: #00acc1;
@@ -41,8 +44,8 @@ body {
 
 .factory-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-bottom: 15px;
 }
 
@@ -50,15 +53,11 @@ body {
     background: var(--card-bg);
     border: 1.5px solid #e0e0e0;
     color: #444;
-    padding: 15px 10px;
-    border-radius: 12px;
-    font-size: 0.95rem;
+    padding: 12px 5px;
+    border-radius: 10px;
+    font-size: 0.85rem;
     font-weight: bold;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
 }
 
 .factory-btn.active {
@@ -81,20 +80,10 @@ body {
     line-height: 1.4;
 }
 
-.info-banner {
-    background: #fff9db;
-    border-left: 5px solid #fab005;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: left;
-    margin-bottom: 15px;
-    font-size: 0.85rem;
-}
-
+/* 🗺️ 유경님 페이지 내부에 박히는 지도 스크린 */
 .map-container {
-    position: relative;
     width: 100%;
-    height: 400px;
+    height: 380px;
     background: #e9ecef;
     border-radius: 16px;
     overflow: hidden;
@@ -104,24 +93,19 @@ body {
     display: none;
 }
 
-iframe {
+#map {
     width: 100%;
     height: 100%;
-    border: none;
 }
 
-/* 🧭 실시간 파란점 내비 앱 강제 호출 단추 */
-.nav-launcher-btn {
-    display: block;
-    background: #00acc1;
-    color: white;
-    text-decoration: none;
-    padding: 14px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    font-weight: bold;
-    font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 172, 193, 0.3);
+/* 🔵 실시간 파란 점 커스텀 디자인 스타일 */
+.custom-blue-dot {
+    width: 14px !important;
+    height: 14px !important;
+    background: #007bff;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #007bff, 0 0 15px #007bff;
 }
 
 .guide-card {
@@ -170,32 +154,23 @@ iframe {
 
 <body>
 
-<div class="header">🏭 공장 내부 차량 길안내 시스템</div>
+<div class="header">🏭 대산공장 통합 차량 안내 시스템</div>
 
 <div class="container">
     
-    <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666; font-size:0.9rem;">📍 목적지 공장을 골라주세요</p>
     <div class="factory-grid">
-        <button class="factory-btn" onclick="selectFactory('PO')"><span>📦</span>PO 공장</button>
-        <button class="factory-btn" onclick="selectFactory('EVA')"><span>🧪</span>EVA 공장</button>
-        <button class="factory-btn" onclick="selectFactory('HPM')"><span>🏗️</span>HPM 공장</button>
-        <button class="factory-btn" onclick="selectFactory('PVC')"><span>🪟</span>PVC 공장</button>
-        <button class="factory-btn" onclick="selectFactory('BPA')"><span>⚗️</span>BPA 공장</button>
-        <button class="factory-btn" onclick="selectFactory('POE')"><span>🛡️</span>POE 공장</button>
+        <button class="factory-btn" onclick="selectFactory('PO')">PO 공장</button>
+        <button class="factory-btn" onclick="selectFactory('EVA')">EVA 공장</button>
+        <button class="factory-btn" onclick="selectFactory('HPM')">HPM 공장</button>
+        <button class="factory-btn" onclick="selectFactory('PVC')">PVC 공장</button>
+        <button class="factory-btn" onclick="selectFactory('BPA')">BPA 공장</button>
+        <button class="factory-btn" onclick="selectFactory('POE')">POE 공장</button>
     </div>
 
-    <div id="statusDashboard" class="status-dashboard">📡 시스템 레이더 가동 대기 중...</div>
-
-    <div class="info-banner">
-        <h3>⚠️ 단지 내 운행 안전 수칙</h3>
-        <p>• 현재 구간 규정 속도: <span id="currentSpeedLimit" style="background:#ffec99; color:#d9480f; padding:2px 5px; border-radius:4px; font-weight:bold;">시속 35km 이하</span> 준수</p>
-        <p>• 하차 공간 진입 전 비상등 점등 및 단지 내 지게차 절대 주의</p>
-    </div>
-
-    <a id="navLauncher" class="nav-launcher-btn" href="#" target="_blank" style="display:none;">🧭 실시간 파란점 내비게이션 열기</a>
+    <div id="statusDashboard" class="status-dashboard">📡 시스템 동기화 가동 준비 중...</div>
 
     <div id="mapContainer" class="map-container">
-        <iframe id="mapFrame" src="" allow="geolocation *;"></iframe>
+        <div id="map"></div>
     </div>
 
     <div id="guideCard" class="guide-card">
@@ -209,59 +184,38 @@ iframe {
 </div>
 
 <script>
+let map = null;
+let userMarker = null; // 🔵 진짜 실시간으로 지도 위를 굴러다닐 파란 점 마커
+let routePolyline = null; // 🛣️ [서문 -> 창고] 빨간색 가이드선
 let currentStageIndex = 0;
 let routeStages = [];
 let watchId = null;
 
 const factoryData = {
     'PO': {
-        // 복원 완료된 완벽한 마이맵 및 구글 지도 앱 연동 주소 체계
-        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&ehbc=2E312F&wp=1",
-        appUrl: "https://www.google.com/maps/d/viewer?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E",
         stages: [
-            {
-                name: "서문 (출발)",
-                lat: 36.9925492, lon: 126.3695483, radius: 150,
-                speedLimit: "35km", 
-                nextTitle: "👉 1단계: 방재실 사거리 방면 이동",
-                nextText: "서문을 통과하셨습니다. 앞쪽에 보이는 방재실 사거리 구간으로 진입해 주세요. (단지 내 시속 35km 준수)",
-                nextImg: "room.png" 
-            },
-            {
-                name: "방재실",
-                lat: 36.9944902, lon: 126.3745901, radius: 150,
-                speedLimit: "35km",
-                nextTitle: "👉 2단계: 미래기술관 교차로 방면 직진",
-                nextText: "방재실 사거리를 통과했습니다. 전방 교차로 및 합류 차량에 유의하시며 미래기술관 앞쪽으로 계속 직진하세요.",
-                nextImg: "future.png" 
-            },
-            {
-                name: "미래기술관",
-                lat: 36.9967810, lon: 126.3799103, radius: 150, 
-                speedLimit: "20km", 
-                nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
-                nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
-                nextImg: "turn_right.png" 
-            },
-            {
-                name: "우회전 지점",
-                lat: 36.9984565, lon: 126.3791392, radius: 150,
-                speedLimit: "20km",
-                nextTitle: "🛑 4단계: 창고 진입 전 [좌회전] 준비",
-                nextText: "우회전 구간을 통과했습니다. 시속 20km 속도를 유지하시고, 정면 구조물을 끼고 안쪽 진입로를 향해 **좌회전** 하세요.",
-                nextImg: "turn_left.png" 
-            },
-            {
-                name: "좌회전 지점",
-                lat: 36.9989486, lon: 126.3841774, radius: 150,
-                speedLimit: "20km",
-                nextTitle: "🏁 최종 단계: PO 출하 창고 도착",
-                nextText: "좌회전 진입 완료했습니다. 전방에 보이는 PO 출하 창고 하차 공간으로 시속 20km 이하로 안전하게 진입해 주세요.",
-                nextImg: "arrival.png" 
-            }
+            { name: "서문 (출발)", lat: 36.9925492, lon: 126.3695483, radius: 150, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 사거리 방면 이동", nextText: "서문을 통과하셨습니다. 앞쪽에 보이는 방재실 사거리 구간으로 진입해 주세요.", nextImg: "room.png" },
+            { name: "방재실", lat: 36.9944902, lon: 126.3745901, radius: 150, speedLimit: "35km", nextTitle: "👉 2단계: 미래기술관 교차로 방면 직진", nextText: "방재실 사거리를 통과했습니다. 미래기술관 앞쪽으로 계속 직진하세요.", nextImg: "future.png" },
+            { name: "미래기술관", lat: 36.9967810, lon: 126.3799103, radius: 150, speedLimit: "20km", nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요", nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. 즉시 우회전하세요.", nextImg: "turn_right.png" },
+            { name: "우회전 지점", lat: 36.9984565, lon: 126.3791392, radius: 150, speedLimit: "20km", nextTitle: "🛑 4단계: 창고 진입 전 [좌회전] 준비", nextText: "우회전 구간을 통과했습니다. 안쪽 진입로를 향해 좌회전 하세요.", nextImg: "turn_left.png" },
+            { name: "좌회전 지점", lat: 36.9989486, lon: 126.3841774, radius: 150, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 도착", nextText: "전방에 보이는 PO 출하 창고 하차 공간으로 안전하게 진입해 주세요.", nextImg: "arrival.png" }
         ]
     }
 };
+
+// 키 없이 작동하는 오픈 지도 초기화
+function initMapEngine() {
+    if (map) return;
+    
+    // 대산공장 한가운데를 기본 줌으로 세팅
+    map = L.map('map').setView([36.9955, 126.3770], 15);
+
+    // 💡 구글 지도와 똑같이 생긴 실시간 위성/일반 융합(하이브리드) 맵 레이어를 다이렉트로 매칭
+    L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 19,
+        attribution: 'Google Maps'
+    }).addTo(map);
+}
 
 function getDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
@@ -279,45 +233,59 @@ function selectFactory(code) {
     if(event && event.currentTarget) event.currentTarget.classList.add('active');
 
     const data = factoryData[code];
-    if(data) {
-        routeStages = data.stages;
+    if(!data) return;
 
-        document.getElementById('mapFrame').src = data.mapUrl;
-        
-        // 🧭 상단 내비 앱 링크 주소 매칭 및 버튼 활성화
-        const launcher = document.getElementById('navLauncher');
-        launcher.href = data.appUrl;
-        launcher.style.display = 'block';
-        
-        document.getElementById('mapContainer').style.display = 'block';
-        document.getElementById('statusDashboard').style.display = 'block';
+    routeStages = data.stages;
+    currentStageIndex = 0;
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const uLat = position.coords.latitude;
-                const uLon = position.coords.longitude;
-                
-                let minDistance = Infinity;
-                let closestIndex = 0;
-                
-                routeStages.forEach((stage, index) => {
-                    let d = getDistance(uLat, uLon, stage.lat, stage.lon);
-                    if (d < minDistance) {
-                        minDistance = d;
-                        closestIndex = index;
-                    }
-                });
-                
-                currentStageIndex = closestIndex;
-                renderCurrentStage();
-                activateTracking();
-            }, function() {
-                currentStageIndex = 0;
-                renderCurrentStage();
-                activateTracking();
-            }, { enableHighAccuracy: true });
-        }
+    document.getElementById('mapContainer').style.display = 'block';
+    document.getElementById('statusDashboard').style.display = 'block';
+    
+    // 엔진 켜기
+    initMapEngine();
+
+    // 맵 크기 재조정 및 가이드 경로선 즉시 그리기
+    setTimeout(() => {
+        map.invalidateSize();
+        map.setView([routeStages[0].lat, routeStages[0].lon], 16);
+        drawRouteLine();
+    }, 100);
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const uLat = position.coords.latitude;
+            const uLon = position.coords.longitude;
+            
+            let minDistance = Infinity;
+            let closestIndex = 0;
+            
+            routeStages.forEach((stage, index) => {
+                let d = getDistance(uLat, uLon, stage.lat, stage.lon);
+                if (d < minDistance) { minDistance = d; closestIndex = index; }
+            });
+            
+            currentStageIndex = closestIndex;
+            renderCurrentStage();
+            startLiveTracking();
+        }, function() {
+            currentStageIndex = 0;
+            renderCurrentStage();
+            startLiveTracking();
+        }, { enableHighAccuracy: true });
     }
+}
+
+// 🛣️ 지도판 위에 가야 할 선(경로선) 빨갛게 그려주는 기능
+function drawRouteLine() {
+    if (routePolyline) map.removeLayer(routePolyline);
+
+    const pathCoordinates = routeStages.map(stage => [stage.lat, stage.lon]);
+
+    routePolyline = L.polyline(pathCoordinates, {
+        color: '#ff0055', // 선명한 핫핑크 레전드 경로선
+        weight: 6,
+        opacity: 0.85
+    }).addTo(map);
 }
 
 function renderCurrentStage() {
@@ -328,26 +296,28 @@ function renderCurrentStage() {
     document.getElementById('guideText').innerHTML = stage.nextText;
     document.getElementById('guideImg').src = stage.nextImg;
     document.getElementById('guideCard').style.display = 'block';
-    
-    const limitBadge = document.getElementById('currentSpeedLimit');
-    if (stage.speedLimit === "20km") {
-        limitBadge.innerText = "시속 20km 이하 (절대 서행)";
-        limitBadge.style.backgroundColor = "#ffc9c9";
-        limitBadge.style.color = "#c2185b";
-    } else {
-        limitBadge.innerText = "시속 35km 이하";
-        limitBadge.style.backgroundColor = "#ffec99";
-        limitBadge.style.color = "#d9480f";
-    }
 }
 
-function activateTracking() {
+function startLiveTracking() {
     if (watchId) navigator.geolocation.clearWatch(watchId);
+
+    const blueDotIcon = L.divIcon({
+        className: 'custom-blue-dot',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+    });
 
     if (navigator.geolocation) {
         watchId = navigator.geolocation.watchPosition(function(position) {
             const uLat = position.coords.latitude;
             const uLon = position.coords.longitude;
+
+            // 🔵 [유경님 요청 핵심] API 키 하나 없이 유경님 페이지 맵 위에 실시간 파란 점 찍고 움직이기 구현!
+            if (!userMarker) {
+                userMarker = L.marker([uLat, uLon], { icon: blueDotIcon }).addTo(map);
+            } else {
+                userMarker.setLatLng([uLat, uLon]); // 차 움직이면 파란 점도 실시간 대시무빙
+            }
 
             if (routeStages.length === 0 || currentStageIndex >= routeStages.length) return;
 
@@ -355,9 +325,9 @@ function activateTracking() {
             const dist = getDistance(uLat, uLon, target.lat, target.lon);
 
             document.getElementById('statusDashboard').innerHTML = 
-                `📡 내비게이션 트래킹 엔진 가동 중<br>` +
-                `📍 현재 좌표: ${uLat.toFixed(6)}, ${uLon.toFixed(6)}<br>` +
-                `🎯 타겟 거점 [${target.name}]까지 남은 거리: ${dist.toFixed(0)}m`;
+                `📡 플러그인 독립형 내비게이션 트래킹 가동 중<br>` +
+                `📍 현재 위치: ${uLat.toFixed(6)}, ${uLon.toFixed(6)}<br>` +
+                `🎯 [${target.name}] 거점 매칭까지 남은 거리: ${dist.toFixed(0)}m`;
 
             if (dist <= target.radius) {
                 currentStageIndex++;
@@ -365,7 +335,7 @@ function activateTracking() {
                     renderCurrentStage();
                 } else {
                     document.getElementById('guideTitle').innerText = "🏁 PO 출하 창고 도착 완료";
-                    document.getElementById('guideText').innerHTML = "안전하게 목적지에 도달했습니다. 안내를 종료합니다.";
+                    document.getElementById('guideText').innerHTML = "안전하게 목적지에 도달했습니다. 운행을 종료합니다.";
                 }
             }
         }, function(error) {
