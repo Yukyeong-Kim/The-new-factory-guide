@@ -254,12 +254,13 @@ let watchId = null; // GPS 추적 세션을 제어할 변수
 
 const factoryData = {
     'PO': {
+        // ★ 유경님의 실제 PO 마이맵 공유 링크로 연동해 두었습니다.
         mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E",
         stages: [
             {
                 name: "서문 (출발)",
                 lat: 36.9925492, lon: 126.3695483, radius: 70,
-                speedLimit: "35km", // 해당 단계의 제한 속도
+                speedLimit: "35km", 
                 nextTitle: "👉 1단계: 방재실 사거리 방면 이동",
                 nextText: "서문을 통과하셨습니다. 앞쪽에 보이는 방재실 사거리 구간으로 진입해 주세요. (단지 내 시속 35km 준수)",
                 nextImg: "room.png" 
@@ -274,15 +275,15 @@ const factoryData = {
             },
             {
                 name: "미래기술관",
-                lat: 36.9967810, lon: 126.3799103, radius: 30, // 미래기술관 통과 시점!
-                speedLimit: "20km", // 💡 미래기술관 탈출 이후 구간은 20km 제한속도 적용
+                lat: 36.9967810, lon: 126.3799103, radius: 30, // 💡 유경님 설계대로 30m 타이트하게 진입 감지!
+                speedLimit: "20km", 
                 nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
                 nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
                 nextImg: "turn_right.png" 
             },
             {
                 name: "우회전 지점",
-                lat: 36.9984565, lon: 126.3791392, radius: 70,
+                lat: 36.9984565, lon: 126.3791392, radius: 50,
                 speedLimit: "20km",
                 nextTitle: "🛑 4단계: 창고 진입 전 [좌회전] 준비",
                 nextText: "우회전 구간을 통과했습니다. 시속 20km 속도를 유지하시고, 정면 구조물을 끼고 안쪽 진입로를 향해 **좌회전** 하세요.",
@@ -290,7 +291,7 @@ const factoryData = {
             },
             {
                 name: "좌회전 지점",
-                lat: 36.9989486, lon: 126.3841774, radius: 70,
+                lat: 36.9989486, lon: 126.3841774, radius: 50,
                 speedLimit: "20km",
                 nextTitle: "🏁 최종 단계: PO 출하 창고 도착",
                 nextText: "좌회전 진입 완료했습니다. 전방에 보이는 PO 출하 창고 하차 공간으로 시속 20km 이하로 안전하게 진입해 주세요.",
@@ -306,7 +307,9 @@ function getDistance(lat1, lon1, lat2, lon2) {
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c; 
 }
 
@@ -314,7 +317,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
 function selectFactory(code) {
     const buttons = document.querySelectorAll('.factory-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if(event) event.currentTarget.classList.add('active');
 
     const data = factoryData[code];
     
@@ -359,7 +362,8 @@ function startTracking() {
             const currentTarget = routeStages[currentStageIndex];
             const distance = getDistance(userLat, userLon, currentTarget.lat, currentTarget.lon);
 
-            if (distance > currentTarget.radius) {
+            // 🎯 설정한 반경 원 안으로 '진입(<=)'하는 순간 교체
+            if (distance <= currentTarget.radius) {
                 currentStageIndex++; 
 
                 if (currentStageIndex < routeStages.length) {
@@ -370,10 +374,10 @@ function startTracking() {
                     document.getElementById('guideText').innerHTML = nextGuide.nextText;
                     document.getElementById('guideImg').src = nextGuide.nextImg;
                     
-                    // 2. ⚡ [핵심] 구간에 맞춰 상단 전광판 제한 속도 스위칭 (35km -> 20km)
+                    // 2. 구간에 맞춰 상단 전광판 제한 속도 스위칭 (35km -> 20km)
                     if (nextGuide.speedLimit === "20km") {
                         document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (절대 서행)";
-                        document.getElementById('currentSpeedLimit').style.color = "#c2185b"; // 20km는 더 빨간색으로 경고
+                        document.getElementById('currentSpeedLimit').style.color = "#c2185b"; 
                     } else {
                         document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
                         document.getElementById('currentSpeedLimit').style.color = "#d9480f";
@@ -396,15 +400,13 @@ function startTracking() {
     }
 }
 
-// 🎯 [신규] 기사님이 지도의 파란 점 위치가 먹통일 때 강제로 재조정하는 버튼 로직
+// 🎯 기사님이 지도의 파란 점 위치가 먹통일 때 강제로 재조정하는 버튼 로직
 function retrackLocation() {
-    // 1. 구글 마이맵 아이프레임을 새로고침하여 구글 맵 내부 GPS 엔진을 다시 흔들어 깨움
     const mapFrame = document.getElementById('mapFrame');
     const currentSrc = mapFrame.src;
     mapFrame.src = ''; 
     mapFrame.src = currentSrc; 
 
-    // 2. 우리 자바스크립트 레이더 엔진도 껐다가 1초 만에 재시동해서 좌표 배달 동기화
     if (watchId) {
         navigator.geolocation.clearWatch(watchId);
         setTimeout(function() {
