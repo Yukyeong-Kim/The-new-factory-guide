@@ -244,6 +244,21 @@ body {
     box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     white-space: nowrap;
 }
+
+/* 🚚 트럭 이모지 깜빡임 애니메이션 */
+@keyframes blink-truck {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.blinking-truck-icon {
+    font-size: 28px;      /* 트럭 크기 */
+    text-align: center;
+    line-height: 28px;
+    animation: blink-truck 1.5s infinite; /* 1.5초 주기로 무한 반복 */
+    filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.3)); /* 약간의 그림자 효과 */
+}
 </style>
 </head>
 
@@ -464,13 +479,16 @@ function startTracking() {
             document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
 
             if (!userMarker) {
-                userMarker = L.circleMarker([userLat, userLon], {
-                    radius: 8,
-                    fillColor: '#d6336c',
-                    fillOpacity: 1,
-                    color: '#ffffff',
-                    weight: 2
-                }).addTo(map);
+                // 🚚 트럭 이모지 아이콘 정의
+                const truckIcon = L.divIcon({
+                    html: '🚚',
+                    className: 'blinking-truck-icon',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15] // 이모지의 중앙을 실제 GPS 좌표에 맞춤
+                });
+
+                // circleMarker 대신 일반 marker에 커스텀 아이콘 적용
+                userMarker = L.marker([userLat, userLon], { icon: truckIcon }).addTo(map);
             } else {
                 userMarker.setLatLng([userLat, userLon]);
             }
