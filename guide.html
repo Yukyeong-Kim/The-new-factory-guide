@@ -215,6 +215,7 @@ body {
 
 <div class="container">
     
+    <!-- 1단계: 도착지 선택 대시보드 -->
     <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666;">📍 목적지 공장을 골라주세요</p>
     <div class="factory-grid">
         <button class="factory-btn" onclick="selectFactory('PO')"><span>📦</span>PO 공장</button>
@@ -225,6 +226,7 @@ body {
         <button class="factory-btn" onclick="selectFactory('POE')"><span>🛡️</span>POE 공장</button>
     </div>
 
+    <!-- 2단계: 안전 수칙 배너 (현재 구간에 따라 제한속도가 시속 35km -> 20km로 자동 스위칭) -->
     <div class="info-banner">
         <h3>⚠️ 단지 내 운행 안전 수칙</h3>
         <p id="speedNotice">• 현재 구간 규정 속도: <span id="currentSpeedLimit" class="speed-badge">시속 35km 이하</span> 서행 준수</p>
@@ -232,12 +234,14 @@ body {
         <p>• 길을 잃거나 이상 발생 시 즉시 문의: 📞 <a href="tel:010-1234-5678">010-1234-5678</a></p>
     </div>
 
+    <!-- 3단계: 구글 마이맵 지도 영역 -->
     <div id="mapWrapper" class="map-wrapper">
+        <!-- 🎯 지도 내부 GPS 위치 재조정 버튼 -->
         <button class="gps-refresh-btn" onclick="retrackLocation()">🔄 내 위치 재조정</button>
-        
         <iframe id="mapFrame" src="" allow="geolocation"></iframe>
     </div>
 
+    <!-- 4단계: 주요 갈림길 실물 가이드 이미지 안내 -->
     <div id="guideCard" class="guide-card">
         <h4 id="guideTitle">📌 주요 갈림길 운행 가이드</h4>
         <div class="guide-img-box">
@@ -251,12 +255,12 @@ body {
 <script>
 let currentStageIndex = 0;
 let routeStages = [];
-let watchId = null; // GPS 추적 세션을 제어할 변수
+let watchId = null; 
 
 const factoryData = {
     'PO': {
-        // ★ 주소 맨 끝에 &iwloc=near 가 기본 장착되어 지도 로딩 시 내 위치 인식을 우선 촉진합니다.
-        mapUrl: "http://googleusercontent.com/maps.google.com/2",
+        // 💡 [유경님 진짜 마이맵 주소 완벽 복원] 위치 매칭 코드(&iwloc=near) 연동 완료
+        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&iwloc=near",
         stages: [
             {
                 name: "서문 (출발)",
@@ -276,7 +280,7 @@ const factoryData = {
             },
             {
                 name: "미래기술관",
-                lat: 36.9967810, lon: 126.3799103, radius: 30, // 💡 유경님의 30m 짧은 코너 진입 설계 고수!
+                lat: 36.9967810, lon: 126.3799103, radius: 30, // 유경님 의도대로 30m 유지
                 speedLimit: "20km", 
                 nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
                 nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
@@ -330,7 +334,6 @@ function selectFactory(code) {
         mapFrame.src = data.mapUrl;
         document.getElementById('mapWrapper').style.display = 'block';
 
-        // 첫 번째 출발 안내 및 기본 속도(35km) 설정
         const firstGuide = routeStages[0];
         document.getElementById('guideTitle').innerText = "🏁 출발 안내: " + firstGuide.name;
         document.getElementById('guideText').innerHTML = firstGuide.nextText;
@@ -340,9 +343,7 @@ function selectFactory(code) {
         document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
         document.getElementById('currentSpeedLimit').style.color = "#d9480f";
 
-        // GPS 추적 레이더 시동
         startTracking();
-        
         document.getElementById('mapWrapper').scrollIntoView({ behavior: 'smooth' });
     } else {
         alert(code + " 공장의 상세 경로 데이터가 등록되지 않았습니다.");
@@ -351,7 +352,7 @@ function selectFactory(code) {
 
 // 🛰️ 실시간 GPS 모니터링 가동 함수
 function startTracking() {
-    if (watchId) navigator.geolocation.clearWatch(watchId); // 기존 추적이 있다면 클리어
+    if (watchId) navigator.geolocation.clearWatch(watchId); 
 
     if (navigator.geolocation) {
         watchId = navigator.geolocation.watchPosition(function(position) {
@@ -363,19 +364,16 @@ function startTracking() {
             const currentTarget = routeStages[currentStageIndex];
             const distance = getDistance(userLat, userLon, currentTarget.lat, currentTarget.lon);
 
-            // 🎯 설정한 반경 원 안으로 '진입(<=)'하는 순간 교체
             if (distance <= currentTarget.radius) {
                 currentStageIndex++; 
 
                 if (currentStageIndex < routeStages.length) {
                     const nextGuide = routeStages[currentStageIndex];
                     
-                    // 1. 하단 안내문 및 가이드 사진 즉시 갱신
                     document.getElementById('guideTitle').innerText = nextGuide.nextTitle;
                     document.getElementById('guideText').innerHTML = nextGuide.nextText;
                     document.getElementById('guideImg').src = nextGuide.nextImg;
                     
-                    // 2. 구간에 맞춰 상단 전광판 제한 속도 스위칭 (35km -> 20km)
                     if (nextGuide.speedLimit === "20km") {
                         document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (절대 서행)";
                         document.getElementById('currentSpeedLimit').style.color = "#c2185b"; 
@@ -401,7 +399,6 @@ function startTracking() {
     }
 }
 
-// 🎯 기사님이 지도의 파란 점 위치가 먹통일 때 강제로 재조정하는 버튼 로직
 function retrackLocation() {
     const mapFrame = document.getElementById('mapFrame');
     const currentSrc = mapFrame.src;
