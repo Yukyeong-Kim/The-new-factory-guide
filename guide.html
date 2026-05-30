@@ -258,16 +258,16 @@ body {
     border: none;
 }
 
-/* 실제 움직이는 트럭 알맹이 */
+/* 실제 움직이는 트럭 알맹이 (크기 절반 축소 적용) */
 .truck-emoji {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
-    font-size: 28px;
+    font-size: 14px; /* 크기 28px -> 14px */
     animation: blink-truck 1.5s infinite;
-    filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3)); /* 그림자도 작게 조정 */
 }
 </style>
 </head>
@@ -489,12 +489,12 @@ function startTracking() {
             document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
 
             if (!userMarker) {
-                // 🚚 트럭 이모지 아이콘 정의 (수정됨)
+                // 🚚 트럭 이모지 아이콘 정의 (크기 절반 축소 적용)
                 const truckIcon = L.divIcon({
                     html: '<div class="truck-emoji">🚚</div>',
                     className: 'blinking-truck-icon',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15] // 이모지의 중앙을 실제 GPS 좌표에 맞춤
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8] // 이모지의 중앙을 실제 GPS 좌표에 맞춤
                 });
 
                 // circleMarker 대신 일반 marker에 커스텀 아이콘 적용
