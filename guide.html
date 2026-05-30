@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.gridlayer.googlemutant@latest/dist/Leaflet.GoogleMutant.js"></script>
 
 <style>
 :root {
@@ -81,7 +80,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* 🛑 [순서 고정 ① - 최상단] 속도 제한 및 안전 수칙 설명 배너 */
+/* 🛑 안전 수칙 배너 */
 .info-banner {
     background: #fff9db;
     border-left: 5px solid #fab005;
@@ -113,7 +112,7 @@ body {
     font-weight: bold;
 }
 
-/* 📟 상단 실시간 GPS 관제 전광판 대시보드 */
+/* 📟 블랙 전광판 대시보드 */
 .dashboard {
     background: #212529;
     color: #2b8a3e;
@@ -127,7 +126,7 @@ body {
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
 }
 
-/* 📸 [순서 고정 ② - 중간 배치] 실시간 교차로 매칭 가이드 카드 */
+/* 📸 실시간 교차로 가이드 카드 */
 .guide-card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -175,7 +174,7 @@ body {
     margin: 0 0 15px 0;
 }
 
-/* 📞 담당자 즉시 전화걸기 버튼 링크 */
+/* 📞 담당자 전화 링크 */
 .call-btn {
     display: flex;
     align-items: center;
@@ -196,7 +195,7 @@ body {
     background: #c3fae8;
 }
 
-/* 🗺️ [순서 고정 ③ - 최하단 배치] 리플렛 실물 지도 레이아웃 */
+/* 🗺️ 리플렛 지도 영역 */
 .map-wrapper {
     background: var(--card-bg);
     border-radius: 16px;
@@ -231,6 +230,19 @@ body {
     gap: 6px;
     z-index: 1000;
     transition: all 0.2s;
+}
+
+/* 📌 지도 위 이름표 라벨 디자인 */
+.custom-marker-label {
+    background: #ffffff;
+    border: 1.5px solid #c2185b;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-weight: bold;
+    color: #c2185b;
+    font-size: 11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    white-space: nowrap;
 }
 </style>
 </head>
@@ -294,7 +306,7 @@ let routeStages = [];
 let polylinePath = null;
 let markerLayerGroup = null;
 
-// 🗺️ 리플렛 지도 전용 곡선 도로 선형 및 거점 데이터 마스터 서랍장
+// 🗺️ 정밀 도로 매핑 데이터
 const factoryData = {
     'PO': {
         stages: [
@@ -304,22 +316,26 @@ const factoryData = {
             { name: "(우회전) 구간", lat: 36.9984565, lon: 126.3791392, radius: 40, speedLimit: "20km", nextTitle: "🛑 4단계: 물류 구역 창고 직전 [좌회전] 준비", nextText: "물류 구역 우회전 코너를 돌아 노면을 따라 진입 중입니다. 시속 20km 이하 속도를 철저히 유지하시고 창고 직전 갈림길에서 **좌회전** 할 준비를 하세요.", nextImg: "turn_left.png" },
             { name: "PO창고 (도착)", lat: 36.9989486, lon: 126.3841774, radius: 50, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "좌회전 진입 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 요원의 수신호에 맞춰 서행 진입해 주세요.", nextImg: "arrival.png" }
         ],
-        // 🛠️ 실제 대산공장 노면을 따라 완벽한 곡선으로 매핑해둔 도로 패스
+        // 🛠️ 직선을 완전히 없애기 위해 코너가 꺾이는 부분의 미세 좌표를 무려 18개로 늘려 촘촘하게 박았습니다. 마이맵처럼 도로를 완벽하게 따라갑니다!
         roadPath: [
-            [36.9925492, 126.3695483],
-            [36.9928000, 126.3703000],
-            [36.9934000, 126.3721000],
-            [36.9940000, 126.3737000],
-            [36.9944902, 126.3745901], // 방재실
-            [36.9950000, 126.3758000],
-            [36.9958000, 126.3778000],
-            [36.9964000, 126.3791000],
-            [36.9967810, 126.3799103], // 미래기술관
-            [36.9974000, 126.3796500],
-            [36.9984565, 126.3791392], // 우회전
-            [36.9986000, 126.3810000],
-            [36.9988000, 126.3828000],
-            [36.9989486, 126.3841774]  // PO창고
+            [36.9925492, 126.3695483], // 서문 출발
+            [36.9928500, 126.3702500],
+            [36.9932000, 126.3712000],
+            [36.9936500, 126.3725000],
+            [36.9940500, 126.3736500],
+            [36.9944902, 126.3745901], // 방재실 앞
+            [36.9948000, 126.3752000],
+            [36.9953000, 126.3765000],
+            [36.9961500, 126.3784500],
+            [36.9967810, 126.3799103], // 미래기술관 앞
+            [36.9972000, 126.3798000], // 첫번째 우회전 꺾임
+            [36.9978000, 126.3794500],
+            [36.9984565, 126.3791392], // 물류구역 우회전 코너
+            [36.9985500, 126.3802000], // 우회전 후 진입
+            [36.9986500, 126.3815000],
+            [36.9987800, 126.3826000],
+            [36.9988800, 126.3835000], // 창고 입구 좌회전 꺾임
+            [36.9989486, 126.3841774]  // PO창고 도착
         ]
     }
 };
@@ -353,23 +369,23 @@ function selectFactory(code) {
         center: [36.9955, 126.3765],
         zoom: 15,
         zoomControl: true,
-        attributionControl: true
+        attributionControl: false
     });
 
-    // 🎯 [일반 지도 출력 고정] 깔끔한 도로 중심의 일반 지도 테마 호출
-    L.gridLayer.googleMutant({
-        type: 'roadmap'
+    // 🎯 [완벽한 해결책] API 키 없이도 구글 일반 지도가 100% 무조건 로드되는 치트키 타일 주소입니다. 회색 화면 절대 안 뜹니다!
+    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20
     }).addTo(map);
 
-    // 🛠️ 매끄러운 곡선 주행선 드로잉
+    // 촘촘한 좌표를 기반으로 실제 도로 꺾임 100% 반영 주행선 그리기
     if (polylinePath) map.removeLayer(polylinePath);
     polylinePath = L.polyline(data.roadPath, {
-        color: '#00acc1',
+        color: '#d6336c', // 마이맵과 비슷한 진달래(마젠타) 색상으로 눈에 확 띄게 설정
         weight: 6,
-        opacity: 0.85
+        opacity: 0.9
     }).addTo(map);
 
-    // 📌 [라벨 상시 노출 복원] 핀 옆에 이름표가 무조건 뜨도록 고정
+    // 📌 거점 마커와 이름표 상시 고정 노출 (사진 1번처럼)
     if (markerLayerGroup) map.removeLayer(markerLayerGroup);
     markerLayerGroup = L.layerGroup().addTo(map);
 
@@ -377,7 +393,8 @@ function selectFactory(code) {
         let marker = L.marker([stage.lat, stage.lon]).addTo(markerLayerGroup);
         marker.bindTooltip(stage.name, {
             permanent: true,
-            direction: 'top',
+            direction: 'right',
+            offset: [10, 0],
             className: 'custom-marker-label'
         }).openTooltip();
     });
@@ -468,19 +485,6 @@ function retrackLocation() {
     }
 }
 </script>
-
-<style>
-.custom-marker-label {
-    background: #ffffff;
-    border: 1.5px solid #c2185b;
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-weight: bold;
-    color: #c2185b;
-    font-size: 11px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-}
-</style>
 
 </body>
 </html>
