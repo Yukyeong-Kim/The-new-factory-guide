@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>통합 사내 차량 길안내 시스템</title>
+
+<style>
+:root {
+    --primary-color: #00acc1;
+    --secondary-color: #c2185b;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+}
+
+body {
+    margin: 0;
+    font-family: 'Malgun Gothic', -apple-system, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+.header {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    color: white;
+    padding: 20px 15px;
+    font-weight: bold;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    letter-spacing: -0.5px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* 공장 선택 메뉴 */
+.factory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.factory-btn {
+    background: var(--card-bg);
+    border: 1.5px solid #e0e0e0;
+    color: #444;
+    padding: 18px 10px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.factory-btn span {
+    font-size: 1.5rem;
+}
+
+.factory-btn.active {
+    border-color: var(--primary-color);
+    background: #e0f7fa;
+    color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 172, 193, 0.15);
+    transform: translateY(-2px);
+}
+
+/* 🛑 안전 수칙 가변 배너 (속도 알림창) */
+.info-banner {
+    background: #fff9db;
+    border-left: 5px solid #fab005;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.info-banner h3 {
+    margin: 0 0 8px 0;
+    color: #f59f00;
+    font-size: 1.05rem;
+}
+
+.info-banner p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #555;
+}
+
+.info-banner a {
+    color: #0076a3;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* 속도 강조 스타일 */
+.speed-badge {
+    background-color: #ffec99;
+    color: #d9480f;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* 🗺️ 구글 마이맵 및 GPS 재조정 버튼 레이아웃 */
+.map-wrapper {
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    display: none;
+    position: relative;
+}
+
+.map-wrapper iframe {
+    width: 100%;
+    height: 420px;
+    border: none;
+}
+
+/* 🎯 내 위치 갱신/재조정 버튼 */
+.gps-refresh-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: #ffffff;
+    color: #333333;
+    border: 2px solid #00acc1;
+    padding: 10px 16px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+.gps-refresh-btn:active {
+    background: #e0f7fa;
+    transform: scale(0.95);
+}
+
+/* 📸 갈림길 안내 카드 */
+.guide-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #e8e8e8;
+    text-align: left;
+    display: none;
+}
+
+.guide-card h4 {
+    margin: 0 0 12px 0;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+
+.guide-img-box {
+    width: 100%;
+    height: 200px;
+    background: #e9ecef;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guide-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.guide-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #444;
+    background: #f1f3f5;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🏭 공장 내부 차량 길안내 시스템</div>
+
+<div class="container">
+    
+    <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666;">📍 목적지 공장을 골라주세요</p>
+    <div class="factory-grid">
+        <button class="factory-btn" onclick="selectFactory('PO')"><span>📦</span>PO 공장</button>
+        <button class="factory-btn" onclick="selectFactory('EVA')"><span>🧪</span>EVA 공장</button>
+        <button class="factory-btn" onclick="selectFactory('HPM')"><span>🏗️</span>HPM 공장</button>
+        <button class="factory-btn" onclick="selectFactory('PVC')"><span>🪟</span>PVC 공장</button>
+        <button class="factory-btn" onclick="selectFactory('BPA')"><span>⚗️</span>BPA 공장</button>
+        <button class="factory-btn" onclick="selectFactory('POE')"><span>🛡️</span>POE 공장</button>
+    </div>
+
+    <div class="info-banner">
+        <h3>⚠️ 단지 내 운행 안전 수칙</h3>
+        <p id="speedNotice">• 현재 구간 규정 속도: <span id="currentSpeedLimit" class="speed-badge">시속 35km 이하</span> 서행 준수</p>
+        <p>• 하차 공간 진입 전 비상등 점등 및 단지 내 지게차 절대 주의</p>
+        <p>• 길을 잃거나 이상 발생 시 즉시 문의: 📞 <a href="tel:010-1234-5678">010-1234-5678</a></p>
+    </div>
+
+    <div id="mapWrapper" class="map-wrapper">
+        <button class="gps-refresh-btn" onclick="retrackLocation()">🔄 내 위치 재조정</button>
+        <iframe id="mapFrame" src=""></iframe>
+    </div>
+
+    <div id="guideCard" class="guide-card">
+        <h4 id="guideTitle">📌 주요 갈림길 운행 가이드</h4>
+        <div class="guide-img-box">
+            <img id="guideImg" src="" alt="갈림길 안내">
+        </div>
+        <p id="guideText" class="guide-text">목적지를 선택하면 상세 교차로 가이드가 표시됩니다.</p>
+    </div>
+
+</div>
+
+<script>
+let currentStageIndex = 0;
+let routeStages = [];
+let watchId = null; // GPS 추적 세션을 제어할 변수
+
+const factoryData = {
+    'PO': {
+        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E",
+        stages: [
+            {
+                name: "서문 (출발)",
+                lat: 36.9925492, lon: 126.3695483, radius: 70,
+                speedLimit: "35km", // 해당 단계의 제한 속도
+                nextTitle: "👉 1단계: 방재실 사거리 방면 이동",
+                nextText: "서문을 통과하셨습니다. 앞쪽에 보이는 방재실 사거리 구간으로 진입해 주세요. (단지 내 시속 35km 준수)",
+                nextImg: "room.png" 
+            },
+            {
+                name: "방재실",
+                lat: 36.9944902, lon: 126.3745901, radius: 70,
+                speedLimit: "35km",
+                nextTitle: "👉 2단계: 미래기술관 교차로 방면 직진",
+                nextText: "방재실 사거리를 통과했습니다. 전방 교차로 및 합류 차량에 유의하시며 미래기술관 앞쪽으로 계속 직진하세요.",
+                nextImg: "future.png" 
+            },
+            {
+                name: "미래기술관",
+                lat: 36.9967810, lon: 126.3799103, radius: 30, // 미래기술관 통과 시점!
+                speedLimit: "20km", // 💡 미래기술관 탈출 이후 구간은 20km 제한속도 적용
+                nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
+                nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
+                nextImg: "turn_right.png" 
+            },
+            {
+                name: "우회전 지점",
+                lat: 36.9984565, lon: 126.3791392, radius: 70,
+                speedLimit: "20km",
+                nextTitle: "🛑 4단계: 창고 진입 전 [좌회전] 준비",
+                nextText: "우회전 구간을 통과했습니다. 시속 20km 속도를 유지하시고, 정면 구조물을 끼고 안쪽 진입로를 향해 **좌회전** 하세요.",
+                nextImg: "turn_left.png" 
+            },
+            {
+                name: "좌회전 지점",
+                lat: 36.9989486, lon: 126.3841774, radius: 70,
+                speedLimit: "20km",
+                nextTitle: "🏁 최종 단계: PO 출하 창고 도착",
+                nextText: "좌회전 진입 완료했습니다. 전방에 보이는 PO 출하 창고 하차 공간으로 시속 20km 이하로 안전하게 진입해 주세요.",
+                nextImg: "arrival.png" 
+            }
+        ]
+    }
+};
+
+// 하버사인 거리 계산 함수
+function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; 
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; 
+}
+
+// 🏢 공장 선택 버튼 클릭 시
+function selectFactory(code) {
+    const buttons = document.querySelectorAll('.factory-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    const data = factoryData[code];
+    
+    if(data) {
+        currentStageIndex = 0;
+        routeStages = data.stages;
+
+        const mapFrame = document.getElementById('mapFrame');
+        mapFrame.src = data.mapUrl;
+        document.getElementById('mapWrapper').style.display = 'block';
+
+        // 첫 번째 출발 안내 및 기본 속도(35km) 설정
+        const firstGuide = routeStages[0];
+        document.getElementById('guideTitle').innerText = "🏁 출발 안내: " + firstGuide.name;
+        document.getElementById('guideText').innerHTML = firstGuide.nextText;
+        document.getElementById('guideImg').src = firstGuide.nextImg;
+        document.getElementById('guideCard').style.display = 'block';
+        
+        document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
+        document.getElementById('currentSpeedLimit').style.color = "#d9480f";
+
+        // GPS 추적 레이더 시동
+        startTracking();
+        
+        document.getElementById('mapWrapper').scrollIntoView({ behavior: 'smooth' });
+    } else {
+        alert(code + " 공장의 상세 경로 데이터가 등록되지 않았습니다.");
+    }
+}
+
+// 🛰️ 실시간 GPS 모니터링 가동 함수
+function startTracking() {
+    if (watchId) navigator.geolocation.clearWatch(watchId); // 기존 추적이 있다면 클리어
+
+    if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(function(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+
+            if (routeStages.length === 0 || currentStageIndex >= routeStages.length) return;
+
+            const currentTarget = routeStages[currentStageIndex];
+            const distance = getDistance(userLat, userLon, currentTarget.lat, currentTarget.lon);
+
+            if (distance > currentTarget.radius) {
+                currentStageIndex++; 
+
+                if (currentStageIndex < routeStages.length) {
+                    const nextGuide = routeStages[currentStageIndex];
+                    
+                    // 1. 하단 안내문 및 가이드 사진 즉시 갱신
+                    document.getElementById('guideTitle').innerText = nextGuide.nextTitle;
+                    document.getElementById('guideText').innerHTML = nextGuide.nextText;
+                    document.getElementById('guideImg').src = nextGuide.nextImg;
+                    
+                    // 2. ⚡ [핵심] 구간에 맞춰 상단 전광판 제한 속도 스위칭 (35km -> 20km)
+                    if (nextGuide.speedLimit === "20km") {
+                        document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (절대 서행)";
+                        document.getElementById('currentSpeedLimit').style.color = "#c2185b"; // 20km는 더 빨간색으로 경고
+                    } else {
+                        document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
+                        document.getElementById('currentSpeedLimit').style.color = "#d9480f";
+                    }
+                    
+                    document.getElementById('guideCard').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    document.getElementById('guideTitle').innerText = "🏁 PO 출하 창고 도착 완료";
+                    document.getElementById('guideText').innerHTML = "안전하게 목적지에 도달했습니다. 안내를 종료합니다.";
+                    document.getElementById('currentSpeedLimit').innerText = "하차 구역 도착 완료";
+                }
+            }
+        }, function(error) {
+            console.error("GPS 수신 오류:", error);
+        }, {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 7000
+        });
+    }
+}
+
+// 🎯 [신규] 기사님이 지도의 파란 점 위치가 먹통일 때 강제로 재조정하는 버튼 로직
+function retrackLocation() {
+    // 1. 구글 마이맵 아이프레임을 새로고침하여 구글 맵 내부 GPS 엔진을 다시 흔들어 깨움
+    const mapFrame = document.getElementById('mapFrame');
+    const currentSrc = mapFrame.src;
+    mapFrame.src = ''; 
+    mapFrame.src = currentSrc; 
+
+    // 2. 우리 자바스크립트 레이더 엔진도 껐다가 1초 만에 재시동해서 좌표 배달 동기화
+    if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        setTimeout(function() {
+            startTracking();
+            alert("🗺️ 내 위치 및 위성 GPS 신호를 재조정했습니다.");
+        }, 300);
+    } else {
+        alert("목적지를 먼저 선택하셔야 GPS 조정이 가능합니다.");
+    }
+}
+</script>
+
+</body>
+</html>
