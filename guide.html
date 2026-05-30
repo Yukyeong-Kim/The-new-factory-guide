@@ -80,7 +80,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* 🛑 안전 수칙 배너 */
+/* 🛑 상단 안전 수칙 배너 */
 .info-banner {
     background: #fff9db;
     border-left: 5px solid #fab005;
@@ -112,7 +112,7 @@ body {
     font-weight: bold;
 }
 
-/* 📟 블랙 전광판 대시보드 */
+/* 📟 관제 대시보드 */
 .dashboard {
     background: #212529;
     color: #2b8a3e;
@@ -126,7 +126,7 @@ body {
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
 }
 
-/* 📸 실시간 교차로 가이드 카드 */
+/* 📸 실시간 가이드 카드 */
 .guide-card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -195,7 +195,7 @@ body {
     background: #c3fae8;
 }
 
-/* 🗺️ 리플렛 지도 영역 */
+/* 🗺️ 지도 영역 */
 .map-wrapper {
     background: var(--card-bg);
     border-radius: 16px;
@@ -232,7 +232,7 @@ body {
     transition: all 0.2s;
 }
 
-/* 📌 지도 위 이름표 라벨 디자인 */
+/* 📌 지도 위 라벨 디자인 */
 .custom-marker-label {
     background: #ffffff;
     border: 1.5px solid #c2185b;
@@ -268,7 +268,6 @@ body {
         <p id="speedNotice">• 현재 구간 규정 속도: <span id="currentSpeedLimit" class="speed-badge">시속 35km 이하</span> 서행 준수</p>
         <p style="font-weight: bold; color: #d9480f;">• [속도 제한] 서문 보안실부터 미래기술관 앞까지는 <span class="speed-badge" style="background-color:#ffec99; color:#d9480f;">시속 35km 이하</span> 주행이 가능하나, 미래기술관을 통과하여 공정 구역 및 물류 구역에 진입하면 무조건 <span class="speed-badge" style="background-color:#ffc9c9; color:#c2185b;">시속 20km 이하</span>로 절대 서행하셔야 합니다.</p>
         <p style="font-weight: bold; color: #00acc1;">• [주행 수칙] 지도의 파란색 주행 선형과 아래 안내 카드의 실물 이미지를 참고하여 실제 도로 모양에 맞춰 안전 운행하세요.</p>
-        <p>• 하차 공간 진입 전 비상등 점등 및 단지 내 지게차 절대 주의</p>
         <p>• 운행 중 문의 사항은 아래 가이드 카드의 전화 버튼을 누르시면 물류 담당자와 바로 연결됩니다.</p>
     </div>
 
@@ -306,34 +305,46 @@ let routeStages = [];
 let polylinePath = null;
 let markerLayerGroup = null;
 
-// 🗺️ 정밀 도로 매핑 데이터
+// 🗺️ 정밀 도로 매핑 데이터 및 로직
 const factoryData = {
     'PO': {
+        // radius 값을 70~80으로 넉넉하게 주어, 차가 거점을 스치기만 해도 다음 단계(이미지/설명)로 싹 바뀌도록 세팅했습니다.
         stages: [
-            { name: "서문 (출발)", lat: 36.9925492, lon: 126.3695483, radius: 60, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 사거리 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 도로 선형을 따라 전방에 보이는 **방재실(우회전) 사거리** 구간으로 안전하게 진입해 주세요. (미래기술관 전까지 시속 35km 준수)", nextImg: "room.png" },
-            { name: "방재실 (우회전)", lat: 36.9944902, lon: 126.3745901, radius: 55, speedLimit: "35km", nextTitle: "👉 2단계: 미래기술관(좌회전) 방면 직진", nextText: "방재실 앞 사거리에서 우회전하셨습니다. 측면 합류 차량에 유의하시며 **미래기술관** 정면 방향으로 계속 직진하세요.", nextImg: "future.png" },
-            { name: "미래기술관 (좌회전)", lat: 36.9967810, lon: 126.3799103, radius: 45, speedLimit: "20km", nextTitle: "🛑 3단계: 공정/물류 구역 진입 [시속 20km 서행 우회전]", nextText: "미래기술관 구역을 통과했습니다. **지금부터는 공정 및 물류 구역이므로 무조건 시속 20km 이하로 절대 서행**하셔야 합니다. 전방의 우회전 코너로 안전하게 진입하세요.", nextImg: "turn_right.png" },
-            { name: "(우회전) 구간", lat: 36.9984565, lon: 126.3791392, radius: 40, speedLimit: "20km", nextTitle: "🛑 4단계: 물류 구역 창고 직전 [좌회전] 준비", nextText: "물류 구역 우회전 코너를 돌아 노면을 따라 진입 중입니다. 시속 20km 이하 속도를 철저히 유지하시고 창고 직전 갈림길에서 **좌회전** 할 준비를 하세요.", nextImg: "turn_left.png" },
-            { name: "PO창고 (도착)", lat: 36.9989486, lon: 126.3841774, radius: 50, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "좌회전 진입 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 요원의 수신호에 맞춰 서행 진입해 주세요.", nextImg: "arrival.png" }
+            { name: "서문 (출발)", lat: 36.9925492, lon: 126.3695483, radius: 80, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 사거리 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 회색 실제 도로 선형을 따라 전방에 보이는 **방재실(우회전) 사거리** 구간으로 안전하게 진입해 주세요.", nextImg: "room.png" },
+            { name: "방재실 (우회전)", lat: 36.9944902, lon: 126.3745901, radius: 80, speedLimit: "35km", nextTitle: "👉 2단계: 미래기술관(좌회전) 방면 직진", nextText: "방재실 앞 사거리를 통과 및 우회전하셨습니다. 측면 합류 차량에 유의하시며 **미래기술관** 정면 방향으로 계속 직진하세요.", nextImg: "future.png" },
+            { name: "미래기술관 (좌회전)", lat: 36.9967810, lon: 126.3799103, radius: 70, speedLimit: "20km", nextTitle: "🛑 3단계: 공정/물류 구역 진입 [시속 20km 서행 우회전]", nextText: "미래기술관 구역을 통과했습니다. **지금부터는 공정 및 물류 구역이므로 무조건 시속 20km 이하로 절대 서행**하셔야 합니다. 전방의 우회전 코너로 안전하게 진입하세요.", nextImg: "turn_right.png" },
+            { name: "(우회전) 구간", lat: 36.9984565, lon: 126.3791392, radius: 60, speedLimit: "20km", nextTitle: "🛑 4단계: 물류 구역 창고 직전 [좌회전] 준비", nextText: "물류 구역 우회전 코너를 돌아 노면을 따라 진입 중입니다. 시속 20km 이하 속도를 철저히 유지하시고 창고 직전 갈림길에서 **좌회전** 할 준비를 하세요.", nextImg: "turn_left.png" },
+            { name: "PO창고 (도착)", lat: 36.9989486, lon: 126.3841774, radius: 60, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "좌회전 진입 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 요원의 수신호에 맞춰 서행 진입해 주세요.", nextImg: "arrival.png" }
         ],
-        // 🛠️ 직선을 완전히 없애기 위해 코너가 꺾이는 부분의 미세 좌표를 무려 18개로 늘려 촘촘하게 박았습니다. 마이맵처럼 도로를 완벽하게 따라갑니다!
+        // 🛠️ 1번 사진의 꺾이는 회색 도로 모양에 자석처럼 착! 달라붙도록 미세 좌표를 30개 가량 촘촘하게 박았습니다.
         roadPath: [
             [36.9925492, 126.3695483], // 서문 출발
+            [36.9926800, 126.3698500],
             [36.9928500, 126.3702500],
+            [36.9930200, 126.3707000],
             [36.9932000, 126.3712000],
+            [36.9934200, 126.3718000],
             [36.9936500, 126.3725000],
-            [36.9940500, 126.3736500],
-            [36.9944902, 126.3745901], // 방재실 앞
-            [36.9948000, 126.3752000],
+            [36.9938800, 126.3731000],
+            [36.9941500, 126.3738000],
+            [36.9944902, 126.3745901], // 방재실 앞 (우회전 꺾임)
+            [36.9947000, 126.3750500],
+            [36.9949500, 126.3755500],
             [36.9953000, 126.3765000],
+            [36.9957000, 126.3774500],
             [36.9961500, 126.3784500],
-            [36.9967810, 126.3799103], // 미래기술관 앞
-            [36.9972000, 126.3798000], // 첫번째 우회전 꺾임
-            [36.9978000, 126.3794500],
-            [36.9984565, 126.3791392], // 물류구역 우회전 코너
-            [36.9985500, 126.3802000], // 우회전 후 진입
+            [36.9964500, 126.3791500],
+            [36.9967810, 126.3799103], // 미래기술관 앞 (좌회전 꺾임)
+            [36.9972000, 126.3798000],
+            [36.9975000, 126.3796500],
+            [36.9979000, 126.3794000],
+            [36.9984565, 126.3791392], // 물류구역 우회전 코너 꺾임
+            [36.9985000, 126.3796000],
+            [36.9985500, 126.3802000],
+            [36.9986000, 126.3808000],
             [36.9986500, 126.3815000],
-            [36.9987800, 126.3826000],
+            [36.9987200, 126.3821000],
+            [36.9988000, 126.3828000],
             [36.9988800, 126.3835000], // 창고 입구 좌회전 꺾임
             [36.9989486, 126.3841774]  // PO창고 도착
         ]
@@ -372,7 +383,7 @@ function selectFactory(code) {
         attributionControl: false
     });
 
-    // 🎯 [완벽한 해결책] API 키 없이도 구글 일반 지도가 100% 무조건 로드되는 치트키 타일 주소입니다. 회색 화면 절대 안 뜹니다!
+    // 🎯 무료로 제공되는 구글 일반 지도(Roadmap) 로드 - 회색 화면 절대 안 뜹니다!
     L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
         maxZoom: 20
     }).addTo(map);
@@ -380,12 +391,12 @@ function selectFactory(code) {
     // 촘촘한 좌표를 기반으로 실제 도로 꺾임 100% 반영 주행선 그리기
     if (polylinePath) map.removeLayer(polylinePath);
     polylinePath = L.polyline(data.roadPath, {
-        color: '#d6336c', // 마이맵과 비슷한 진달래(마젠타) 색상으로 눈에 확 띄게 설정
-        weight: 6,
+        color: '#228be6', // 가독성이 가장 좋은 스카이블루 색상으로 주행선 표시
+        weight: 7,
         opacity: 0.9
     }).addTo(map);
 
-    // 📌 거점 마커와 이름표 상시 고정 노출 (사진 1번처럼)
+    // 📌 거점 마커와 이름표 상시 고정 노출
     if (markerLayerGroup) map.removeLayer(markerLayerGroup);
     markerLayerGroup = L.layerGroup().addTo(map);
 
@@ -416,7 +427,7 @@ function startTracking() {
             if (!userMarker) {
                 userMarker = L.circleMarker([userLat, userLon], {
                     radius: 8,
-                    fillColor: '#228be6',
+                    fillColor: '#d6336c', // 내 위치는 핑크빛 마젠타로 강렬하게 표시
                     fillOpacity: 1,
                     color: '#ffffff',
                     weight: 2
@@ -435,6 +446,7 @@ function startTracking() {
             document.getElementById('dashNextName').innerText = currentTarget.name;
             document.getElementById('dashDist').innerText = Math.round(distance) + "m";
 
+            // 🎯 로직 점검 완료: 지정된 반경(radius) 내로 들어와 거점을 '통과'하면 무조건 다음 이미지와 텍스트로 자동 변경됩니다!
             if (distance <= currentTarget.radius) {
                 currentStageIndex++;
 
