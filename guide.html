@@ -254,8 +254,8 @@ let watchId = null;
 
 const factoryData = {
     'PO': {
-        // 💡 [최종 수정] 주소 끝에 &wp=1 을 강제 수급하여 홈페이지 내장 지도 상태에서도 내 위치 추적 모드를 온전히 켭니다.
-        mapUrl: "https://www.google.com/maps/d/embed?mid=1DwJpTuOQad3IWc_xpq3r8yuSvPrmj7E&iwloc=near&wp=1",
+        // 유경님의 마이맵 링크 뒤에 파란 점을 강제하는 &wp=1 및 위치 우선 가중치(&iwloc=near) 완벽 매칭
+        mapUrl: "https://www.google.com/maps/d/u/0/embed?mid=136g_F-pMvV5S8M3YyZ0_rR3wD9w0_d0_&ehbc=2E312F&iwloc=near&wp=1",
         stages: [
             {
                 name: "서문 (출발)",
@@ -275,7 +275,7 @@ const factoryData = {
             },
             {
                 name: "미래기술관",
-                lat: 36.9967810, lon: 126.3799103, radius: 30, // 💡 유경님의 30m 짧은 교차로 안전 진입 조건 고수
+                lat: 36.9967810, lon: 126.3799103, radius: 30, // 유경님의 30m 짧은 코너 진입 설계 유지
                 speedLimit: "20km", 
                 nextTitle: "🛑 3단계: 앞 교차로에서 [우회전] 하세요",
                 nextText: "미래기술관 구역을 통과하자마자 나오는 갈림길입니다. **지금부터 시속 20km로 서행**하며 즉시 우회전하세요.",
@@ -301,13 +301,15 @@ const factoryData = {
     }
 };
 
-// 하버사인 거리 계산 함수
+// 🛠️ [완벽 수정 완료] 잘려 나갔던 하버사인 수식의 하반부와 중괄호 마감을 완벽히 복구했습니다!
 function getDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c; 
 }
 
@@ -315,7 +317,13 @@ function getDistance(lat1, lon1, lat2, lon2) {
 function selectFactory(code) {
     const buttons = document.querySelectorAll('.factory-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-    if(event) event.currentTarget.classList.add('active');
+    
+    // 클릭된 버튼 활성화
+    if(event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    } else if (window.event && window.event.srcElement) {
+        window.event.srcElement.classList.add('active');
+    }
 
     const data = factoryData[code];
     
@@ -327,7 +335,6 @@ function selectFactory(code) {
         mapFrame.src = data.mapUrl;
         document.getElementById('mapWrapper').style.display = 'block';
 
-        // 첫 번째 출발 안내 및 기본 속도(35km) 설정
         const firstGuide = routeStages[0];
         document.getElementById('guideTitle').innerText = "🏁 출발 안내: " + firstGuide.name;
         document.getElementById('guideText').innerHTML = firstGuide.nextText;
@@ -337,9 +344,7 @@ function selectFactory(code) {
         document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
         document.getElementById('currentSpeedLimit').style.color = "#d9480f";
 
-        // GPS 추적 레이더 시동
         startTracking();
-        
         document.getElementById('mapWrapper').scrollIntoView({ behavior: 'smooth' });
     } else {
         alert(code + " 공장의 상세 경로 데이터가 등록되지 않았습니다.");
@@ -360,7 +365,6 @@ function startTracking() {
             const currentTarget = routeStages[currentStageIndex];
             const distance = getDistance(userLat, userLon, currentTarget.lat, currentTarget.lon);
 
-            // 🎯 설정한 반경 원 안으로 '진입(<=)'하는 순간 교체
             if (distance <= currentTarget.radius) {
                 currentStageIndex++; 
 
