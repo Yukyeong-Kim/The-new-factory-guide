@@ -212,7 +212,7 @@ body {
     height: 480px;
 }
 
-/* 🗺️ 지도 위 버튼 디자인 (경로 확인, 내 위치 확인) */
+/* 🗺️ 지도 위 버튼 디자인 */
 .map-fab-btn {
     position: absolute;
     background: #ffffff;
@@ -261,7 +261,7 @@ body {
     white-space: nowrap;
 }
 
-/* ⭐ 별 이모지 깜빡임 애니메이션 (크기 1.5배 증가) */
+/* ⭐ 별 이모지 깜빡임 애니메이션 */
 @keyframes blink-star {
     0% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(1.3); }
@@ -271,7 +271,6 @@ body {
 .blinking-star-icon {
     background: transparent;
     border: none;
-    z-index: 99999 !important; /* 모든 요소 중 최상단으로 강제 고정 */
 }
 
 .star-emoji {
@@ -283,7 +282,6 @@ body {
     font-size: 24px;
     animation: blink-star 1.2s infinite;
     filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.4)); 
-    z-index: 99999 !important;
 }
 </style>
 </head>
@@ -350,7 +348,7 @@ let routeStages = [];
 let currentRoadPath = [];
 let polylinePath = null;
 let markerLayerGroup = null;
-let isFirstGpsFix = true; // 🎯 앱 중간 접속 시 초기 거점 파악용 플래그
+let isFirstGpsFix = true;
 
 // 🗺️ 정밀 도로 매핑 데이터 및 로직
 const factoryData = {
@@ -449,7 +447,6 @@ function findNextStageByLocation(userLatLng) {
         }
     }
 
-    // 도로에서 1km 이상 너무 멀리 떨어져 있으면 기본값 1번 거점으로 설정
     if (minUserDist > 1000) return 1;
 
     for (let s = 1; s < routeStages.length; s++) {
@@ -466,12 +463,11 @@ function findNextStageByLocation(userLatLng) {
             }
         }
         
-        // 내 위치의 경로 인덱스보다 거점의 경로 인덱스가 더 크다면, 그곳이 바로 다음 거점!
         if (closestStageIdx > closestUserIdx) {
             return s;
         }
     }
-    return routeStages.length - 1; // 이미 모든 거점을 다 통과했을 경우 마지막 거점 리턴
+    return routeStages.length - 1; 
 }
 
 // 🖥️ UI를 업데이트하는 공통 함수
@@ -508,15 +504,14 @@ function selectFactory(code) {
     if(!data) return;
 
     currentStageIndex = 1; 
-    isFirstGpsFix = true; // 🎯 앱 시작(선택) 시 플래그 초기화
+    isFirstGpsFix = true; 
     routeStages = data.stages;
     currentRoadPath = data.roadPath;
 
     document.getElementById('dashBoard').style.display = 'block';
     
-    // 임시로 1번 가이드 띄워두고 위성 신호 잡히면 바로 스위칭됨
     document.getElementById('guideCard').style.display = 'block';
-    updateGuideUI(0); // 임시 0번(출발) 텍스트
+    updateGuideUI(0); 
 
     document.getElementById('mapWrapper').style.display = 'block';
 
@@ -531,6 +526,11 @@ function selectFactory(code) {
         zoomControl: true,
         attributionControl: false
     });
+
+    // 🌟 별 마커 전용 최상위 도화지(Pane) 생성 및 CSS 강제 설정
+    map.createPane('userMarkerPane');
+    map.getPane('userMarkerPane').style.zIndex = 9999;
+    map.getPane('userMarkerPane').style.pointerEvents = 'none';
 
     L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
         maxZoom: 20
@@ -587,9 +587,10 @@ function startTracking() {
                     iconAnchor: [12, 12] 
                 });
 
+                // 생성한 전용 최상위 Pane에 마커 부착
                 userMarker = L.marker([userLat, userLon], { 
                     icon: starIcon,
-                    zIndexOffset: 10000 
+                    pane: 'userMarkerPane'
                 }).addTo(map);
             } else {
                 userMarker.setLatLng([userLat, userLon]);
@@ -628,19 +629,21 @@ function startTracking() {
     }
 }
 
-// 🎯 내 위치 확인 기능 (별 마커 중앙 이동)
+// 🎯 내 위치 확인 기능 (확대 없이 현재 줌 레벨 유지한 채 부드럽게 위치만 이동)
 function centerMyLocation() {
     if (userMarker) {
-        map.flyTo(userMarker.getLatLng(), 17, { animate: true, duration: 1.2 });
+        // map.getZoom() 을 사용하여 현재 배율 그대로 고정
+        map.flyTo(userMarker.getLatLng(), map.getZoom(), { animate: true, duration: 1.2 });
     } else {
         alert("📡 위성 GPS 신호를 수신 중입니다. 잠시만 기다려 주세요.");
     }
 }
 
-// 🧭 경로 확인 기능 (전체 경로가 보이게 줌 아웃)
+// 🧭 경로 확인 기능 (기존보다 여백을 줄여 지도가 약 105% 더 꽉 차게 확대되도록 수정)
 function viewEntireRoute() {
     if (polylinePath && map) {
-        map.flyToBounds(polylinePath.getBounds(), { animate: true, duration: 1.2, padding: [40, 40] });
+        // padding 값을 [40, 40] 에서 [10, 10] 으로 대폭 줄여서 더 꽉 차게 보이게 만듦
+        map.flyToBounds(polylinePath.getBounds(), { animate: true, duration: 1.2, padding: [10, 10] });
     } else {
         alert("목적지 공장을 먼저 선택해 주세요.");
     }
