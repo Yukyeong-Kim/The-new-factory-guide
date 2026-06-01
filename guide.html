@@ -571,10 +571,16 @@ function startTracking() {
 
             document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
 
+
             // 🎯 최초 1회, 사용자의 현재 위치를 기반으로 다음 스테이지 자동 파악
             if (isFirstGpsFix) {
                 currentStageIndex = findNextStageByLocation(userLatLng);
-                updateGuideUI(currentStageIndex);
+                
+                // 현재 향하고 있는 목적지로 가기 위한 가이드는 이전 인덱스에 저장되어 있음
+                let uiIndex = currentStageIndex - 1;
+                if (uiIndex < 0) uiIndex = 0; // 최소값 방어 로직
+                
+                updateGuideUI(uiIndex);
                 isFirstGpsFix = false;
             }
 
