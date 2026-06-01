@@ -209,27 +209,43 @@ body {
 
 #map {
     width: 100%;
-    height: 420px;
+    height: 480px;
 }
 
-.gps-refresh-btn {
+/* 🗺️ 지도 위 버튼 디자인 (경로 확인, 내 위치 확인) */
+.map-fab-btn {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
     background: #ffffff;
     color: #333333;
-    border: 2px solid #00acc1;
-    padding: 10px 16px;
+    border: 1px solid rgba(0,0,0,0.15);
     border-radius: 30px;
     font-weight: bold;
     font-size: 0.9rem;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
     z-index: 1000;
     transition: all 0.2s;
+    height: 45px;
+    padding: 0 20px;
+    right: 15px; 
+}
+
+.route-view-btn {
+    bottom: 80px; 
+    color: #228be6;
+}
+
+.gps-refresh-btn {
+    bottom: 20px; 
+    color: #d6336c;
+}
+
+.map-fab-btn span.fab-icon {
+    margin-right: 8px;
+    font-size: 1.1rem;
 }
 
 /* 📌 지도 위 이름표 라벨 디자인 */
@@ -245,29 +261,29 @@ body {
     white-space: nowrap;
 }
 
-/* 🚚 트럭 이모지 깜빡임 애니메이션 (수정됨) */
-@keyframes blink-truck {
+/* ⭐ 별 이모지 깜빡임 애니메이션 (크기 1.5배 증가) */
+@keyframes blink-star {
     0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(1.2); }
+    50% { opacity: 0.5; transform: scale(1.3); }
     100% { opacity: 1; transform: scale(1); }
 }
 
-/* Leaflet 마커 기본 틀은 투명하게 냅둠 */
-.blinking-truck-icon {
+.blinking-star-icon {
     background: transparent;
     border: none;
+    z-index: 99999 !important; /* 모든 요소 중 최상단으로 강제 고정 */
 }
 
-/* 실제 움직이는 트럭 알맹이 (크기 절반 축소 적용) */
-.truck-emoji {
+.star-emoji {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
-    font-size: 14px; /* 크기 28px -> 14px */
-    animation: blink-truck 1.5s infinite;
-    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3)); /* 그림자도 작게 조정 */
+    font-size: 24px;
+    animation: blink-star 1.2s infinite;
+    filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.4)); 
+    z-index: 99999 !important;
 }
 </style>
 </head>
@@ -314,7 +330,12 @@ body {
     </div>
 
     <div id="mapWrapper" class="map-wrapper">
-        <button class="gps-refresh-btn" onclick="retrackLocation()">🔄 내 위치 재조정</button>
+        <button class="map-fab-btn route-view-btn" onclick="viewEntireRoute()">
+            <span class="fab-icon">🧭</span> 경로 확인
+        </button>
+        <button class="map-fab-btn gps-refresh-btn" onclick="centerMyLocation()">
+            <span class="fab-icon">🎯</span> 내 위치 확인
+        </button>
         <div id="map"></div>
     </div>
 
@@ -324,11 +345,12 @@ body {
 let map = null;
 let userMarker = null;
 let watchId = null;
-let currentStageIndex = 1; // 🎯 앱 시작 시 첫 목표 거점을 1번(방재실)으로 설정
+let currentStageIndex = 1; 
 let routeStages = [];
 let currentRoadPath = [];
 let polylinePath = null;
 let markerLayerGroup = null;
+let isFirstGpsFix = true; // 🎯 앱 중간 접속 시 초기 거점 파악용 플래그
 
 // 🗺️ 정밀 도로 매핑 데이터 및 로직
 const factoryData = {
@@ -341,7 +363,6 @@ const factoryData = {
             { name: "(좌회전) 구간", lat: 36.9989486, lon: 126.3841666, radius: 25, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "마지막 좌회전 진입을 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 진입해 주세요.", nextImg: "arrival.png" },
             { name: "PO창고 (도착)", lat: 37.0001000, lon: 126.3839166, radius: 30, speedLimit: "20km", nextTitle: "🏁 운행 종료", nextText: "안전하게 하차 공간 매칭 지점에 도달했습니다. 안내를 종료합니다. 수고하셨습니다!", nextImg: "arrival.png" }
         ],
-        // 정밀 추출 172개 곡선 도로 궤적 좌표
         roadPath: [
             [36.9925492, 126.3695555], [36.9926500, 126.3697772], [36.9927500, 126.3700250], [36.9928140, 126.3702600],
             [36.9928500, 126.3705014], [36.9928800, 126.3707964], [36.9928900, 126.3710271], [36.9928950, 126.3712041],
@@ -377,7 +398,6 @@ const factoryData = {
     }
 };
 
-// 🗺️ 궤적을 굽이굽이 따라가며 '실제 남은 도로 곡선 거리'를 계산하는 마법의 함수!
 function getRouteDistance(userLatLng, targetLatLng, pathCoords) {
     if (!pathCoords || pathCoords.length === 0) return userLatLng.distanceTo(targetLatLng);
 
@@ -414,26 +434,89 @@ function getRouteDistance(userLatLng, targetLatLng, pathCoords) {
     return routeDist;
 }
 
+// 🎯 내비게이션 중간 접속 시 현재 위치를 파악하여 다음 거점을 찾아주는 함수
+function findNextStageByLocation(userLatLng) {
+    if (!currentRoadPath || currentRoadPath.length === 0) return 1;
+
+    let minUserDist = Infinity;
+    let closestUserIdx = 0;
+    for (let i = 0; i < currentRoadPath.length; i++) {
+        let pt = L.latLng(currentRoadPath[i][0], currentRoadPath[i][1]);
+        let d = userLatLng.distanceTo(pt);
+        if (d < minUserDist) {
+            minUserDist = d;
+            closestUserIdx = i;
+        }
+    }
+
+    // 도로에서 1km 이상 너무 멀리 떨어져 있으면 기본값 1번 거점으로 설정
+    if (minUserDist > 1000) return 1;
+
+    for (let s = 1; s < routeStages.length; s++) {
+        let stageLatLng = L.latLng(routeStages[s].lat, routeStages[s].lon);
+        let minStageDist = Infinity;
+        let closestStageIdx = 0;
+        
+        for (let i = 0; i < currentRoadPath.length; i++) {
+            let pt = L.latLng(currentRoadPath[i][0], currentRoadPath[i][1]);
+            let d = stageLatLng.distanceTo(pt);
+            if (d < minStageDist) {
+                minStageDist = d;
+                closestStageIdx = i;
+            }
+        }
+        
+        // 내 위치의 경로 인덱스보다 거점의 경로 인덱스가 더 크다면, 그곳이 바로 다음 거점!
+        if (closestStageIdx > closestUserIdx) {
+            return s;
+        }
+    }
+    return routeStages.length - 1; // 이미 모든 거점을 다 통과했을 경우 마지막 거점 리턴
+}
+
+// 🖥️ UI를 업데이트하는 공통 함수
+function updateGuideUI(index) {
+    if (index >= routeStages.length) return;
+    const guide = routeStages[index];
+    
+    document.getElementById('guideTitle').innerText = guide.nextTitle;
+    document.getElementById('guideText').innerHTML = guide.nextText;
+    if(guide.nextImg) document.getElementById('guideImg').src = guide.nextImg;
+    
+    if (guide.speedLimit === "20km") {
+        document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정/물류 구역 절대 서행)";
+        document.getElementById('currentSpeedLimit').style.color = "#c2185b";
+    } else {
+        document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
+        document.getElementById('currentSpeedLimit').style.color = "#d9480f";
+    }
+}
+
 function selectFactory(code) {
     const buttons = document.querySelectorAll('.factory-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
     if(event && event.currentTarget) event.currentTarget.classList.add('active');
 
+    // 🚧 준비 중인 공장 예외 처리
+    if (code !== 'PO') {
+        alert("해당 공장 길 안내는 현재 준비 중입니다. 🚧");
+        if(event && event.currentTarget) event.currentTarget.classList.remove('active');
+        return;
+    }
+
     const data = factoryData[code];
     if(!data) return;
 
-    currentStageIndex = 1; // 🎯 방재실부터 거리를 타겟팅
+    currentStageIndex = 1; 
+    isFirstGpsFix = true; // 🎯 앱 시작(선택) 시 플래그 초기화
     routeStages = data.stages;
     currentRoadPath = data.roadPath;
 
     document.getElementById('dashBoard').style.display = 'block';
     
-    // 첫 화면은 서문 가이드 고정
-    const startGuide = routeStages[0];
-    document.getElementById('guideTitle').innerText = startGuide.nextTitle;
-    document.getElementById('guideText').innerHTML = startGuide.nextText;
-    document.getElementById('guideImg').src = startGuide.nextImg;
+    // 임시로 1번 가이드 띄워두고 위성 신호 잡히면 바로 스위칭됨
     document.getElementById('guideCard').style.display = 'block';
+    updateGuideUI(0); // 임시 0번(출발) 텍스트
 
     document.getElementById('mapWrapper').style.display = 'block';
 
@@ -449,7 +532,6 @@ function selectFactory(code) {
         attributionControl: false
     });
 
-    // 🎯 일반 지도 타일 로드
     L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
         maxZoom: 20
     }).addTo(map);
@@ -485,20 +567,30 @@ function startTracking() {
         watchId = navigator.geolocation.watchPosition(function(position) {
             const userLat = position.coords.latitude;
             const userLon = position.coords.longitude;
+            const userLatLng = L.latLng(userLat, userLon);
 
             document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
 
+            // 🎯 최초 1회, 사용자의 현재 위치를 기반으로 다음 스테이지 자동 파악
+            if (isFirstGpsFix) {
+                currentStageIndex = findNextStageByLocation(userLatLng);
+                updateGuideUI(currentStageIndex);
+                isFirstGpsFix = false;
+            }
+
             if (!userMarker) {
-                // 🚚 트럭 이모지 아이콘 정의 (크기 절반 축소 적용)
-                const truckIcon = L.divIcon({
-                    html: '<div class="truck-emoji">🚚</div>',
-                    className: 'blinking-truck-icon',
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8] // 이모지의 중앙을 실제 GPS 좌표에 맞춤
+                // ⭐ 별 이모지 아이콘 적용
+                const starIcon = L.divIcon({
+                    html: '<div class="star-emoji">⭐</div>',
+                    className: 'blinking-star-icon',
+                    iconSize: [24, 24], 
+                    iconAnchor: [12, 12] 
                 });
 
-                // circleMarker 대신 일반 marker에 커스텀 아이콘 적용
-                userMarker = L.marker([userLat, userLon], { icon: truckIcon }).addTo(map);
+                userMarker = L.marker([userLat, userLon], { 
+                    icon: starIcon,
+                    zIndexOffset: 10000 
+                }).addTo(map);
             } else {
                 userMarker.setLatLng([userLat, userLon]);
             }
@@ -506,31 +598,17 @@ function startTracking() {
             if (routeStages.length === 0 || currentStageIndex >= routeStages.length) return;
 
             const currentTarget = routeStages[currentStageIndex];
-            const userLatLng = L.latLng(userLat, userLon);
             const targetLatLng = L.latLng(currentTarget.lat, currentTarget.lon);
             
-            // 🎯 직선 거리(통과 인식용)와 실제 곡선 거리(대시보드 표시용) 분리 적용
             const straightDistance = userLatLng.distanceTo(targetLatLng);
             const routeDistance = getRouteDistance(userLatLng, targetLatLng, currentRoadPath);
 
             document.getElementById('dashNextName').innerText = currentTarget.name;
             document.getElementById('dashDist').innerText = Math.round(routeDistance) + "m";
 
-            // 🎯 설정된 반경 내 통과 시 자동으로 다음 거점 정보로 화면 스위칭!
+            // 🎯 설정된 반경 내 통과 시 자동으로 다음 거점 스위칭
             if (straightDistance <= currentTarget.radius) {
-                const nextGuide = routeStages[currentStageIndex]; 
-                
-                document.getElementById('guideTitle').innerText = nextGuide.nextTitle;
-                document.getElementById('guideText').innerHTML = nextGuide.nextText;
-                document.getElementById('guideImg').src = nextGuide.nextImg;
-                
-                if (nextGuide.speedLimit === "20km") {
-                    document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정/물류 구역 절대 서행)";
-                    document.getElementById('currentSpeedLimit').style.color = "#c2185b";
-                } else {
-                    document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
-                    document.getElementById('currentSpeedLimit').style.color = "#d9480f";
-                }
+                updateGuideUI(currentStageIndex);
                 document.getElementById('guideCard').scrollIntoView({ behavior: 'smooth' });
                 
                 currentStageIndex++;
@@ -550,19 +628,21 @@ function startTracking() {
     }
 }
 
-function retrackLocation() {
-    if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        if (userMarker) {
-            map.removeLayer(userMarker);
-            userMarker = null;
-        }
-        setTimeout(function() {
-            startTracking();
-            alert("🗺️ 실시간 위성 GPS 수신 상태를 원형 복원했습니다.");
-        }, 300);
+// 🎯 내 위치 확인 기능 (별 마커 중앙 이동)
+function centerMyLocation() {
+    if (userMarker) {
+        map.flyTo(userMarker.getLatLng(), 17, { animate: true, duration: 1.2 });
     } else {
-        alert("목적지 공장을 먼저 선택하셔야 GPS 조율이 가동됩니다.");
+        alert("📡 위성 GPS 신호를 수신 중입니다. 잠시만 기다려 주세요.");
+    }
+}
+
+// 🧭 경로 확인 기능 (전체 경로가 보이게 줌 아웃)
+function viewEntireRoute() {
+    if (polylinePath && map) {
+        map.flyToBounds(polylinePath.getBounds(), { animate: true, duration: 1.2, padding: [40, 40] });
+    } else {
+        alert("목적지 공장을 먼저 선택해 주세요.");
     }
 }
 </script>
