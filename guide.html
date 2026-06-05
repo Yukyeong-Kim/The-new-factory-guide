@@ -43,7 +43,7 @@ body {
     box-sizing: border-box;
 }
 
-/* 공장 선택 메뉴 */
+/* 창고 선택 메뉴 */
 .factory-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -292,20 +292,21 @@ body {
 
 <div class="container">
     
-    <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666;">📍 목적지 공장을 골라주세요</p>
+    <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666;">📍 목적지 창고를 골라주세요</p>
     <div class="factory-grid">
-        <button class="factory-btn" onclick="selectFactory('PO')">PO 공장</button>
-        <button class="factory-btn" onclick="selectFactory('EVA')">EVA 공장</button>
-        <button class="factory-btn" onclick="selectFactory('HPM')">HPM 공장</button>
-        <button class="factory-btn" onclick="selectFactory('PVC')">PVC 공장</button>
-        <button class="factory-btn" onclick="selectFactory('BPA')">BPA 공장</button>
-        <button class="factory-btn" onclick="selectFactory('POE')">POE 공장</button>
+        <button class="factory-btn" onclick="selectFactory('PO')">PO 창고</button>
+        <button class="factory-btn" onclick="selectFactory('EVA')">EVA 창고</button>
+        <button class="factory-btn" onclick="selectFactory('HPM')">HPM 창고</button>
+        <button class="factory-btn" onclick="selectFactory('PVC')">PVC 창고</button>
+        <button class="factory-btn" onclick="selectFactory('BPA')">BPA 창고</button>
+        <button class="factory-btn" onclick="selectFactory('POE')">POE 창고</button>
+        <button class="factory-btn" onclick="selectFactory('RAW')" style="grid-column: span 2;">원부자재 창고</button>
     </div>
 
     <div class="info-banner">
         <h3>⚠️ 단지 내 운행 안전 수칙</h3>
         <p id="speedNotice">• 현재 구간 규정 속도: <span id="currentSpeedLimit" class="speed-badge">시속 35km 이하</span> 서행 준수</p>
-        <p style="font-weight: bold; color: #d9480f;">• [속도 제한] 서문 보안실부터 미래기술관 앞까지는 <span class="speed-badge" style="background-color:#ffec99; color:#d9480f;">시속 35km 이하</span> 주행이 가능하나, 미래기술관을 통과하여 공정 구역 및 물류 구역에 진입하면 무조건 <span class="speed-badge" style="background-color:#ffc9c9; color:#c2185b;">시속 20km 이하</span>로 절대 서행하셔야 합니다.</p>
+        <p style="font-weight: bold; color: #d9480f;">• [속도 제한] 서문 보안실부터 방재실 이전까지는 <span class="speed-badge" style="background-color:#ffec99; color:#d9480f;">시속 35km 이하</span> 주행이 가능하나, 방재실 이후 공정 구역에 진입하면 <span class="speed-badge" style="background-color:#ffc9c9; color:#c2185b;">시속 20km 이하</span>로 서행하고, <b>물류 상차장 근접 구간(좌회전 300m 전)</b>부터는 무조건 <span class="speed-badge" style="background-color:#eebefa; color:#862e9c;">시속 15km 이하</span>로 절대 서행하셔야 합니다.</p>
         <p>• 운행 중 문의 사항은 아래 가이드 카드의 전화 버튼을 누르시면 물류 담당자와 바로 연결됩니다.</p>
     </div>
 
@@ -354,44 +355,72 @@ let isFirstGpsFix = true;
 const factoryData = {
     'PO': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925492, lon: 126.3695555, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 사거리 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 파란색 주행선을 따라 전방에 보이는 **방재실(우회전) 사거리** 구간으로 안전하게 진입해 주세요.", nextImg: "room.png" },
-            { name: "방재실 (우회전)", lat: 36.9944902, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 미래기술관(좌회전) 방면 직진", nextText: "방재실 앞 사거리를 통과하셨습니다. 측면 합류 차량에 유의하시며 **미래기술관** 정면 방향으로 도로를 따라 계속 직진하세요.", nextImg: "future.png" },
-            { name: "미래기술관 (좌회전)", lat: 36.9967810, lon: 126.3799166, radius: 40, speedLimit: "20km", nextTitle: "🛑 3단계: 공정/물류 구역 진입 [시속 20km 서행 우회전]", nextText: "미래기술관 구역 교차로를 지나 좌회전하셨습니다. **지금부터는 공정 및 물류 구역이므로 무조건 시속 20km 이하로 절대 서행**하셔야 합니다. 직전 갈림길에서 우회전 차량 신호에 주의하세요.", nextImg: "turn_right.png" },
-            { name: "(우회전) 구간", lat: 36.9984565, lon: 126.3791388, radius: 25, speedLimit: "20km", nextTitle: "🛑 4단계: 물류 구역 창고 직전 [좌회전] 준비", nextText: "물류 구역 우회전 코너를 통과했습니다. 노면 차선을 유지하시고 전방 창고 입구 방향을 향해 **좌회전** 할 준비를 하세요.", nextImg: "turn_left.png" },
-            { name: "(좌회전) 구간", lat: 36.9989486, lon: 126.3841666, radius: 25, speedLimit: "20km", nextTitle: "🏁 최종 단계: PO 출하 창고 하차장 도킹 완료", nextText: "마지막 좌회전 진입을 완료했습니다. 정면에 보이는 **PO 출하 창고 하차 공간** 내부로 사내 지게차를 절대 주의하며 안전 진입해 주세요.", nextImg: "arrival.png" },
-            { name: "PO창고 (도착)", lat: 37.0001000, lon: 126.3839166, radius: 30, speedLimit: "20km", nextTitle: "🏁 운행 종료", nextText: "안전하게 하차 공간 매칭 지점에 도달했습니다. 안내를 종료합니다. 수고하셨습니다!", nextImg: "arrival.png" }
+            { 
+                name: "서문 (출발)", 
+                lat: 36.9925556, lon: 126.3695556, 
+                radius: 50, speedLimit: "35km", 
+                nextTitle: "👉 1단계: 방재실 방면 이동", 
+                nextText: "서문 보안실을 통과하셨습니다. 파란색 주행선을 따라 전방에 보이는 **방재실 사거리** 방면으로 안전하게 이동해 주세요.", 
+                nextImg: "room.png" 
+            },
+            { 
+                name: "방재실 (직진)", 
+                lat: 36.9945000, lon: 126.3745833, 
+                radius: 50, speedLimit: "20km", 
+                nextTitle: "👉 2단계: 파이프랙 방면 (직진)", 
+                nextText: "방재실 앞 사거리를 지납니다. 지금부터는 공정 구역이므로 시속 20km 이하로 서행하세요. 교차로에서 **직진**하여 파이프랙 방면으로 계속 이동하세요.", 
+                nextImg: "piperack.png" 
+            },
+            { 
+                name: "파이프랙 밑 (우회전)", 
+                lat: 36.9978889, lon: 126.3740000, 
+                radius: 40, speedLimit: "20km", 
+                nextTitle: "🛑 3단계: 공정/물류 구역 진입 [우회전 후 직진]", 
+                nextText: "파이프랙 밑 교차로에 진입했습니다. 여기서 **우회전** 하신 후 도로를 따라 직진하세요. 전방 **좌회전 구간 300m 전부터 시속 15km 이하로 속도를 줄여야 하니** 유의하세요.", 
+                nextImg: "left.png" 
+            },
+            { 
+                name: "(좌회전) 구간", 
+                lat: 36.9989444, lon: 126.3841667, 
+                radius: 25, speedLimit: "15km", 
+                nextTitle: "🏁 4단계: PO 출하 창고 도착 준비", 
+                nextText: "물류 상차장에 근접했습니다. 여기서 **좌회전** 후 정면에 보이는 **PO 출하 창고 목적지**로 사내 지게차에 주의하며 안전하게 진입해 주세요.", 
+                nextImg: "arrival.png" 
+            },
+            { 
+                name: "PO창고 (도착)", 
+                lat: 37.0000833, lon: 126.3839167, 
+                radius: 30, speedLimit: "15km", 
+                nextTitle: "🏁 운행 종료", 
+                nextText: "안전하게 목적지에 도달했습니다. 수고하셨습니다!", 
+                nextImg: "arrival.png" 
+            }
         ],
+        // 115개 전체 경로 포인트 유지
         roadPath: [
-            [36.9925492, 126.3695555], [36.9926500, 126.3697772], [36.9927500, 126.3700250], [36.9928140, 126.3702600],
-            [36.9928500, 126.3705014], [36.9928800, 126.3707964], [36.9928900, 126.3710271], [36.9928950, 126.3712041],
-            [36.9929200, 126.3713490], [36.9929500, 126.3715528], [36.9929700, 126.3717459], [36.9929800, 126.3718639],
-            [36.9929900, 126.3720034], [36.9930200, 126.3721912], [36.9930500, 126.3723736], [36.9930800, 126.3724916],
-            [36.9930900, 126.3726203], [36.9931000, 126.3727705], [36.9931050, 126.3729744], [36.9931600, 126.3731514],
-            [36.9932000, 126.3733016], [36.9932500, 126.3735001], [36.9933000, 126.3736342], [36.9933500, 126.3738059],
-            [36.9933800, 126.3739614], [36.9934200, 126.3741116], [36.9934800, 126.3742726], [36.9935500, 126.3744174],
-            [36.9935800, 126.3745354], [36.9937000, 126.3746856], [36.9938700, 126.3747232], [36.9940700, 126.3746803],
-            [36.9942500, 126.3746534], [36.9943800, 126.3746213], [36.9944902, 126.3745833], [36.9946200, 126.3745421],
-            [36.9947200, 126.3746360], [36.9947500, 126.3748050], [36.9947800, 126.3749994], [36.9948400, 126.3753240],
-            [36.9948700, 126.3754527], [36.9948900, 126.3755922], [36.9949200, 126.3757317], [36.9949500, 126.3758363],
-            [36.9949800, 126.3759194], [36.9950200, 126.3762547], [36.9950500, 126.3763701], [36.9950800, 126.3764988],
-            [36.9950900, 126.3767080], [36.9951200, 126.3769709], [36.9951500, 126.3771077], [36.9951800, 126.3773437],
-            [36.9952500, 126.3775610], [36.9953200, 126.3777433], [36.9954500, 126.3778909], [36.9955300, 126.3782476],
-            [36.9956200, 126.3784193], [36.9957500, 126.3786373], [36.9958300, 126.3787661], [36.9959400, 126.3789431],
-            [36.9960500, 126.3790772], [36.9961500, 126.3792167], [36.9962800, 126.3793508], [36.9963500, 126.3794635],
-            [36.9964200, 126.3796083], [36.9966500, 126.3797531], [36.9967810, 126.3799166], [36.9969200, 126.3798336],
-            [36.9971500, 126.3797585], [36.9973200, 126.3796727], [36.9974500, 126.3795654], [36.9976200, 126.3795117],
-            [36.9977500, 126.3794688], [36.9979200, 126.3793669], [36.9980500, 126.3793025], [36.9982400, 126.3792274],
-            [36.9983500, 126.3791577], [36.9984565, 126.3791388], [36.9984800, 126.3793186], [36.9985200, 126.3794796],
-            [36.9985500, 126.3796244], [36.9985800, 126.3798282], [36.9985900, 126.3800536], [36.9986200, 126.3804237],
-            [36.9986600, 126.3805900], [36.9986800, 126.3807617], [36.9986900, 126.3809172], [36.9987000, 126.3810728],
-            [36.9987200, 126.3812230], [36.9987400, 126.3813839], [36.9987500, 126.3815234], [36.9987600, 126.3816736],
-            [36.9987700, 126.3819096], [36.9987800, 126.3820652], [36.9988100, 126.3822422], [36.9988200, 126.3823871],
-            [36.9988400, 126.3825695], [36.9988500, 126.3826928], [36.9988700, 126.3828484], [36.9988900, 126.3830523],
-            [36.9989100, 126.3831971], [36.9989200, 126.3833688], [36.9989400, 126.3835297], [36.9989500, 126.3837228],
-            [36.9989600, 126.3838677], [36.9989700, 126.3840125], [36.9989486, 126.3841666], [36.9990500, 126.3841198],
-            [36.9991200, 126.3841278], [36.9993500, 126.3840903], [36.9994200, 126.3840795], [36.9995500, 126.3840635],
-            [36.9996600, 126.3840366], [36.9997600, 126.3840205], [36.9998700, 126.3840179], [36.9999600, 126.3839830],
-            [37.0000200, 126.3839588], [37.0001000, 126.3839166]
+            [36.9925556, 126.3695556], [36.9926475, 126.3697772], [36.9927503, 126.3700025], [36.9928146, 126.3702600], [36.9928489, 126.3705014],
+            [36.9928660, 126.3707964], [36.9928703, 126.3710271], [36.9928874, 126.3712041], [36.9929217, 126.3713490], [36.9929303, 126.3715528],
+            [36.9929774, 126.3717459], [36.9929903, 126.3718639], [36.9929903, 126.3720034], [36.9930117, 126.3721912], [36.9930374, 126.3723736],
+            [36.9930246, 126.3724916], [36.9930760, 126.3726203], [36.9931060, 126.3727705], [36.9931060, 126.3729744], [36.9931617, 126.3731514],
+            [36.9932045, 126.3733016], [36.9932474, 126.3735001], [36.9933031, 126.3736342], [36.9933502, 126.3738059], [36.9933759, 126.3739614],
+            [36.9934230, 126.3741116], [36.9934573, 126.3742726], [36.9935087, 126.3744174], [36.9935473, 126.3745354], [36.9935705, 126.3746577],
+            [36.9937119, 126.3746856], [36.9938747, 126.3747232], [36.9940761, 126.3746803], [36.9942346, 126.3746534], [36.9943524, 126.3746213],
+            [36.9944510, 126.3745971], [36.9945000, 126.3745833], [36.9945549, 126.3745596], [36.9946245, 126.3745421], [36.9948865, 126.3744937],
+            [36.9952696, 126.3743935], [36.9956105, 126.3742927], [36.9959447, 126.3742283], [36.9963217, 126.3741318], [36.9967416, 126.3740352],
+            [36.9971700, 126.3739708], [36.9975642, 126.3738421], [36.9978791, 126.3737828], [36.9978889, 126.3740000], [36.9979301, 126.3741628],
+            [36.9979537, 126.3743104], [36.9979729, 126.3745384], [36.9980072, 126.3747315], [36.9980286, 126.3749326], [36.9980543, 126.3751016],
+            [36.9980736, 126.3752599], [36.9980929, 126.3754235], [36.9981079, 126.3755737], [36.9981315, 126.3757936], [36.9981507, 126.3760136],
+            [36.9981722, 126.3762952], [36.9982086, 126.3765286], [36.9982364, 126.3768343], [36.9982707, 126.3771267], [36.9983071, 126.3774164],
+            [36.9983221, 126.3776336], [36.9983585, 126.3778965], [36.9983799, 126.3781057], [36.9984121, 126.3783551], [36.9984335, 126.3785617],
+            [36.9984635, 126.3787789], [36.9984913, 126.3789613], [36.9985020, 126.3791330], [36.9984906, 126.3793186], [36.9985077, 126.3794796],
+            [36.9985206, 126.3796244], [36.9985506, 126.3798282], [36.9985763, 126.3800536], [36.9985934, 126.3802628], [36.9986448, 126.3804237],
+            [36.9986619, 126.3805900], [36.9986705, 126.3807617], [36.9986791, 126.3809172], [36.9987005, 126.3810728], [36.9987005, 126.3812230],
+            [36.9987348, 126.3813839], [36.9987519, 126.3815234], [36.9987776, 126.3816736], [36.9987862, 126.3819096], [36.9987905, 126.3820652],
+            [36.9988033, 126.3822422], [36.9988462, 126.3823871], [36.9988462, 126.3825695], [36.9988505, 126.3826928], [36.9988719, 126.3828484],
+            [36.9988762, 126.3830523], [36.9989233, 126.3831971], [36.9989276, 126.3833688], [36.9989104, 126.3835297], [36.9989404, 126.3837228],
+            [36.9989661, 126.3838677], [36.9989876, 126.3840125], [36.9989444, 126.3841667], [36.9990925, 126.3841198], [36.9991996, 126.3841278],
+            [36.9993260, 126.3840903], [36.9994267, 126.3840795], [36.9995424, 126.3840635], [36.9996516, 126.3840366], [36.9997651, 126.3840205],
+            [36.9998722, 126.3840179], [36.9999665, 126.3839830], [37.0000458, 126.3839588], [37.0000833, 126.3839167], [37.0000833, 126.3839167]
         ]
     }
 };
@@ -432,7 +461,6 @@ function getRouteDistance(userLatLng, targetLatLng, pathCoords) {
     return routeDist;
 }
 
-// 🎯 내비게이션 중간 접속 시 현재 위치를 파악하여 다음 거점을 찾아주는 함수
 function findNextStageByLocation(userLatLng) {
     if (!currentRoadPath || currentRoadPath.length === 0) return 1;
 
@@ -470,7 +498,21 @@ function findNextStageByLocation(userLatLng) {
     return routeStages.length - 1; 
 }
 
-// 🖥️ UI를 업데이트하는 공통 함수
+// 🚦 속도 제한 배너 색상 및 텍스트 단독 업데이트 함수 (동적 덮어쓰기용)
+function updateSpeedLimitUI(speedLimit) {
+    if (speedLimit === "15km") {
+        document.getElementById('currentSpeedLimit').innerText = "시속 15km 이하 (상차장 근접 절대 서행)";
+        document.getElementById('currentSpeedLimit').style.cssText = "background-color: #eebefa; color: #862e9c;";
+    } else if (speedLimit === "20km") {
+        document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정 구역 서행)";
+        document.getElementById('currentSpeedLimit').style.cssText = "background-color: #ffc9c9; color: #c2185b;";
+    } else {
+        document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
+        document.getElementById('currentSpeedLimit').style.cssText = "background-color: #ffec99; color: #d9480f;";
+    }
+}
+
+// 🖥️ 기본 안내 UI를 업데이트하는 함수
 function updateGuideUI(index) {
     if (index >= routeStages.length) return;
     const guide = routeStages[index];
@@ -478,14 +520,6 @@ function updateGuideUI(index) {
     document.getElementById('guideTitle').innerText = guide.nextTitle;
     document.getElementById('guideText').innerHTML = guide.nextText;
     if(guide.nextImg) document.getElementById('guideImg').src = guide.nextImg;
-    
-    if (guide.speedLimit === "20km") {
-        document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정/물류 구역 절대 서행)";
-        document.getElementById('currentSpeedLimit').style.color = "#c2185b";
-    } else {
-        document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하";
-        document.getElementById('currentSpeedLimit').style.color = "#d9480f";
-    }
 }
 
 function selectFactory(code) {
@@ -493,9 +527,8 @@ function selectFactory(code) {
     buttons.forEach(btn => btn.classList.remove('active'));
     if(event && event.currentTarget) event.currentTarget.classList.add('active');
 
-    // 🚧 준비 중인 공장 예외 처리
     if (code !== 'PO') {
-        alert("해당 공장 길 안내는 현재 준비 중입니다. 🚧");
+        alert("해당 창고 길 안내는 현재 준비 중입니다. 🚧");
         if(event && event.currentTarget) event.currentTarget.classList.remove('active');
         return;
     }
@@ -512,6 +545,7 @@ function selectFactory(code) {
     
     document.getElementById('guideCard').style.display = 'block';
     updateGuideUI(0); 
+    updateSpeedLimitUI(routeStages[0].speedLimit); // 첫 시작 속도 적용
 
     document.getElementById('mapWrapper').style.display = 'block';
 
@@ -527,7 +561,6 @@ function selectFactory(code) {
         attributionControl: false
     });
 
-    // 🌟 별 마커 전용 최상위 도화지(Pane) 생성 및 CSS 강제 설정
     map.createPane('userMarkerPane');
     map.getPane('userMarkerPane').style.zIndex = 9999;
     map.getPane('userMarkerPane').style.pointerEvents = 'none';
@@ -571,21 +604,17 @@ function startTracking() {
 
             document.getElementById('dashCoords').innerText = userLat.toFixed(6) + ", " + userLon.toFixed(6);
 
-
-            // 🎯 최초 1회, 사용자의 현재 위치를 기반으로 다음 스테이지 자동 파악
+            // 최초 1회 진입 시 현 위치 파악
             if (isFirstGpsFix) {
                 currentStageIndex = findNextStageByLocation(userLatLng);
-                
-                // 현재 향하고 있는 목적지로 가기 위한 가이드는 이전 인덱스에 저장되어 있음
                 let uiIndex = currentStageIndex - 1;
-                if (uiIndex < 0) uiIndex = 0; // 최소값 방어 로직
+                if (uiIndex < 0) uiIndex = 0;
                 
                 updateGuideUI(uiIndex);
                 isFirstGpsFix = false;
             }
 
             if (!userMarker) {
-                // ⭐ 별 이모지 아이콘 적용
                 const starIcon = L.divIcon({
                     html: '<div class="star-emoji">⭐</div>',
                     className: 'blinking-star-icon',
@@ -593,7 +622,6 @@ function startTracking() {
                     iconAnchor: [12, 12] 
                 });
 
-                // 생성한 전용 최상위 Pane에 마커 부착
                 userMarker = L.marker([userLat, userLon], { 
                     icon: starIcon,
                     pane: 'userMarkerPane'
@@ -613,7 +641,19 @@ function startTracking() {
             document.getElementById('dashNextName').innerText = currentTarget.name;
             document.getElementById('dashDist').innerText = Math.round(routeDistance) + "m";
 
-            // 🎯 설정된 반경 내 통과 시 자동으로 다음 거점 스위칭
+            // ⭐ [동적 속도 제한 업데이트]
+            // 현재 주행 중인 구간의 기본 속도를 가져옴
+            let uiSpeedLimit = routeStages[currentStageIndex - 1].speedLimit; 
+
+            // 내가 바라보는 다음 타겟이 "(좌회전) 구간" 이고, 남은 거리가 300m 이하로 떨어지면 속도 15km/h로 즉시 덮어쓰기
+            if (currentTarget.name === "(좌회전) 구간" && routeDistance <= 300) {
+                uiSpeedLimit = "15km";
+            }
+            // 매 이동 시마다 속도 UI를 상황에 맞게 최신화
+            updateSpeedLimitUI(uiSpeedLimit);
+
+
+            // 🎯 설정된 반경 내 거점 통과 시
             if (straightDistance <= currentTarget.radius) {
                 updateGuideUI(currentStageIndex);
                 document.getElementById('guideCard').scrollIntoView({ behavior: 'smooth' });
@@ -635,23 +675,19 @@ function startTracking() {
     }
 }
 
-// 🎯 내 위치 확인 기능 (확대 없이 현재 줌 레벨 유지한 채 부드럽게 위치만 이동)
 function centerMyLocation() {
     if (userMarker) {
-        // map.getZoom() 을 사용하여 현재 배율 그대로 고정
         map.flyTo(userMarker.getLatLng(), map.getZoom(), { animate: true, duration: 1.2 });
     } else {
         alert("📡 위성 GPS 신호를 수신 중입니다. 잠시만 기다려 주세요.");
     }
 }
 
-// 🧭 경로 확인 기능 (기존보다 여백을 줄여 지도가 약 105% 더 꽉 차게 확대되도록 수정)
 function viewEntireRoute() {
     if (polylinePath && map) {
-        // padding 값을 [40, 40] 에서 [10, 10] 으로 대폭 줄여서 더 꽉 차게 보이게 만듦
         map.flyToBounds(polylinePath.getBounds(), { animate: true, duration: 1.2, padding: [10, 10] });
     } else {
-        alert("목적지 공장을 먼저 선택해 주세요.");
+        alert("목적지 창고를 먼저 선택해 주세요.");
     }
 }
 </script>
