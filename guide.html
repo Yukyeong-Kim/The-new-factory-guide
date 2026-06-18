@@ -301,7 +301,7 @@ body {
         <button class="factory-btn" onclick="selectFactory('PVC')">PVC 창고</button>
         <button class="factory-btn" onclick="selectFactory('BPA')">BPA 창고</button>
         <button class="factory-btn" onclick="selectFactory('POE')">POE 창고</button>
-        <button class="factory-btn" onclick="selectFactory('RAW')" style="grid-column: span 2;">원부자재관리실</button>
+        <button class="factory-btn" onclick="selectFactory('RAW')">원부자재관리실</button>
     </div>
 
     <div class="info-banner">
@@ -380,46 +380,47 @@ const commonPath_115 = [
     [36.9998722, 126.3840179], [36.9999665, 126.3839830], [37.0000458, 126.3839588], [37.0000833, 126.3839167], [37.0000833, 126.3839167]
 ];
 
-// 🗺️ 정밀 도로 매핑 데이터
+// 🗺️ 정밀 도로 매핑 데이터 (선행 안내 방식 완벽 적용)
+// 💡 nextTitle, nextText, nextImg는 '해당 포인트를 지날 때 띄워줄 [다음 목표 지점]에 대한 안내'입니다.
 const factoryData = {
-    // 🏭 PO/HPM 경로 (끝까지 감)
+    // 🏭 PO/HPM 경로
     'PO': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 전방에 보이는 **방재실 사거리** 방면으로 안전하게 이동해 주세요.", nextImg: "room.png" },
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 방면 (직진)", nextText: "방재실 앞 사거리를 지납니다. 지금부터는 공정 구역이므로 시속 20km 이하로 서행하세요. **직진**하여 계속 이동하세요.", nextImg: "piperack.png" },
-            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🛑 3단계: 공정/물류 구역 진입 [우회전 후 직진]", nextText: "파이프랙 밑 교차로에 진입했습니다. **우회전** 하신 후 직진하세요.", nextImg: "left.png" },
-            { name: "(좌회전) 구간", lat: 36.9989444, lon: 126.3841667, radius: 25, speedLimit: "15km", nextTitle: "🏁 4단계: PO/HPM 출하 창고 도착 준비", nextText: "물류 상차장에 근접했습니다. 여기서 **좌회전** 후 정면에 보이는 **PO/HPM 창고 목적지**로 안전하게 진입해 주세요.", nextImg: "arrival.png" },
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
+            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 방면 이동", nextText: "방재실 앞 사거리를 통과 중입니다. 지금부터 시속 20km 이하로 서행하세요. 다음 교차로인 **파이프랙 밑에서 우회전**하세요.", nextImg: "piperack.png" },
+            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🛑 3단계: 물류 구역 진입", nextText: "우회전 후 직진 중입니다. 전방 물류 상차장 부근 갈림길에서 **좌회전**을 준비하세요.", nextImg: "left.png" },
+            { name: "(좌회전) 구간", lat: 36.9989444, lon: 126.3841667, radius: 25, speedLimit: "15km", nextTitle: "🏁 4단계: PO/HPM 창고 도착 준비", nextText: "좌회전하셨습니다. 정면에 보이는 **PO/HPM 출하 창고**로 안전하게 진입하세요.", nextImg: "arrival.png" },
             { name: "PO/HPM 창고 (도착)", lat: 37.0000833, lon: 126.3839167, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "PO/HPM 창고에 안전하게 도착했습니다. 수고하셨습니다!", nextImg: "arrival.png" }
         ],
         roadPath: commonPath_115
     },
-    // 🏭 EVA 경로 (중반부 파이프랙 통과 후 도착)
+    // 🏭 EVA 경로
     'EVA': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 전방에 보이는 **방재실 사거리** 방면으로 안전하게 이동해 주세요.", nextImg: "room.png" },
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 방면 (직진)", nextText: "방재실 앞 사거리를 지납니다. 지금부터는 공정 구역이므로 시속 20km 이하로 서행하세요. **직진**하여 계속 이동하세요.", nextImg: "piperack.png" },
-            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🏁 3단계: EVA 출하 창고 도착 준비", nextText: "파이프랙 밑 교차로에 진입했습니다. 여기서 **우회전** 하신 후 도로를 따라 직진하시면 곧 **EVA 창고**가 나타납니다. 시속 15km 이하로 감속해주세요.", nextImg: "eva_arrival.png" },
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
+            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 방면 이동", nextText: "방재실 앞 사거리를 통과 중입니다. 지금부터 시속 20km 이하로 서행하세요. 다음 교차로인 **파이프랙 밑에서 우회전**하세요.", nextImg: "piperack.png" },
+            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🏁 3단계: EVA 창고 도착 준비", nextText: "우회전 후 직진하시면 곧 **EVA 창고** 목적지가 나타납니다. 15km 이하로 감속해주세요.", nextImg: "eva_arrival.png" },
             { name: "EVA 창고 (도착)", lat: 36.99866, lon: 126.38091, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "EVA 창고에 안전하게 도착했습니다. 수고하셨습니다!", nextImg: "eva_arrival.png" }
         ],
         roadPath: commonPath_115
     },
-    // 🏭 PVC 경로 (초반부 방재실 통과 후 도착)
+    // 🏭 PVC 경로 (💡 방재실 이후 속도 15km로 조정됨)
     'PVC': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 전방에 보이는 **방재실 사거리** 방면으로 안전하게 이동해 주세요.", nextImg: "room.png" },
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "🏁 2단계: PVC 출하 창고 도착 준비", nextText: "방재실 앞 사거리를 지납니다. 공정 구역이므로 시속 20km 이하로 서행하세요. **직진**하시면 곧 전방에 **PVC 창고** 목적지가 나타납니다. 15km 이하로 감속해주세요.", nextImg: "pvc_arrival.png" },
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
+            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "15km", nextTitle: "🏁 2단계: PVC 창고 도착 준비", nextText: "방재실 앞 사거리를 지납니다. 물류 상차장에 근접했으므로 **시속 15km 이하로 절대 서행**하세요. 직진하시면 곧 전방에 **PVC 창고** 목적지가 나타납니다.", nextImg: "pvc_arrival.png" },
             { name: "PVC 창고 (도착)", lat: 36.99652, lon: 126.37408, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "PVC 창고에 안전하게 도착했습니다. 수고하셨습니다!", nextImg: "pvc_arrival.png" }
         ],
         roadPath: commonPath_115
     },
-    // 📦 원부자재관리실(RAW) 경로 (방재실~본관 앞 구간 35km 속도 반영)
+    // 📦 원부자재관리실(RAW) 경로
     'RAW': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문을 통과했습니다. 정면의 **방재실** 방면을 향해 35km/h로 주행해 주세요.", nextImg: "" }, 
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 본관 방면 (직진)", nextText: "방재실 사거리입니다. 본관 앞 교차로까지는 **35km/h**가 유지됩니다. 안전하게 직진하세요.", nextImg: "raw_room.png" },
-            { name: "본관 앞 (직진)", lat: 36.9969500, lon: 126.3803000, radius: 50, speedLimit: "20km", nextTitle: "👉 3단계: 플레어스택 다리 방면 (직진)", nextText: "본관 앞을 지납니다. 지금부터는 공정 구역이므로 **20km/h로 감속** 후 플레어스택 다리 방면으로 직진하세요.", nextImg: "raw_main.png" },
-            { name: "플레어스택 다리 앞 (좌회전)", lat: 36.9964600, lon: 126.3838100, radius: 40, speedLimit: "15km", nextTitle: "🛑 4단계: 물류 구역 진입 [좌회전]", nextText: "플레어스택 다리 앞입니다. 여기서 **좌회전** 하시고 15km 이하로 절대 서행해주세요.", nextImg: "raw_left.png" },
-            { name: "차량 정비 창고 앞 (직진)", lat: 37.0008096, lon: 126.3870607, radius: 40, speedLimit: "15km", nextTitle: "🏁 5단계: 원부자재 관리실 도착 준비", nextText: "차량 정비 창고 앞을 지납니다. 계속 직진하여 목적지로 진입하세요.", nextImg: "raw_straight.png" },
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **우회전**하세요.", nextImg: "raw_room.png" }, 
+            { name: "방재실 (우회전)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 본관 방면 이동", nextText: "방재실 사거리에서 우회전 하셨습니다. 다음 교차로인 **본관 앞에서는 직진**하세요. (이곳까지는 35km 유지 가능)", nextImg: "raw_main.png" },
+            { name: "본관 앞 (직진)", lat: 36.9969500, lon: 126.3803000, radius: 50, speedLimit: "20km", nextTitle: "👉 3단계: 플레어스택 다리 방면 이동", nextText: "본관 앞을 지납니다. 지금부터는 공정 구역이므로 **20km/h로 감속** 하세요. 전방 **플레어스택 다리 앞에서 좌회전**을 준비하세요.", nextImg: "raw_left.png" },
+            { name: "플레어스택 다리 앞 (좌회전)", lat: 36.9964600, lon: 126.3838100, radius: 40, speedLimit: "15km", nextTitle: "👉 4단계: 차량 정비 창고 직진", nextText: "좌회전하셨습니다. 15km 이하로 속도를 줄이고 **차량 정비 창고 앞을 지나 계속 직진**하세요.", nextImg: "raw_straight.png" },
+            { name: "차량 정비 창고 앞 (직진)", lat: 37.0008096, lon: 126.3870607, radius: 40, speedLimit: "15km", nextTitle: "🏁 5단계: 원부자재 관리실 도착 준비", nextText: "정비 창고 앞을 지납니다. 곧 목적지인 **원부자재 관리실**이 나타납니다.", nextImg: "raw_arrival.png" },
             { name: "원부자재 관리실 (도착)", lat: 37.0024200, lon: 126.3855400, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "원부자재 관리실에 안전하게 도착했습니다!", nextImg: "raw_arrival.png" }
         ],
         roadPath: [
@@ -450,7 +451,6 @@ function truncatePathToDestination(pathCoords, lastStage) {
     let minTargetDist = Infinity;
     let targetIdx = pathCoords.length - 1;
 
-    // 경로 배열 중 목적지와 가장 가까운 포인트를 찾습니다.
     for (let i = 0; i < pathCoords.length; i++) {
         let pt = L.latLng(pathCoords[i][0], pathCoords[i][1]);
         let d = targetLatLng.distanceTo(pt);
@@ -459,8 +459,6 @@ function truncatePathToDestination(pathCoords, lastStage) {
             targetIdx = i;
         }
     }
-    
-    // 출발점부터 목적지와 가장 가까운 인덱스까지만 배열을 잘라서 반환합니다.
     return pathCoords.slice(0, targetIdx + 1);
 }
 
@@ -581,7 +579,6 @@ function selectFactory(code) {
     isFirstGpsFix = true; 
     routeStages = data.stages;
     
-    // ✂️ 선택한 창고의 마지막 도착지점 좌표까지만 115개 경로를 자릅니다!
     const lastStage = routeStages[routeStages.length - 1];
     currentRoadPath = truncatePathToDestination(data.roadPath, lastStage);
 
@@ -616,7 +613,6 @@ function selectFactory(code) {
 
     if (polylinePath) map.removeLayer(polylinePath);
     
-    // 잘라낸 경로(currentRoadPath)로 선을 그립니다.
     polylinePath = L.polyline(currentRoadPath, {
         color: '#228be6',
         weight: 7,
@@ -699,7 +695,6 @@ function startTracking() {
                 userMarker.setLatLng([userLat, userLon]);
             }
 
-            // 🛑 최종 목적지에 이미 도달했으면 더 이상 경로 갱신을 하지 않음
             if (routeStages.length === 0 || currentStageIndex >= routeStages.length) return;
 
             const currentTarget = routeStages[currentStageIndex];
@@ -725,7 +720,6 @@ function startTracking() {
                 
                 currentStageIndex++;
                 
-                // 🏁 다음 목적지가 배열의 끝이면(최종 목적지 도착)
                 if(currentStageIndex >= routeStages.length) {
                      document.getElementById('dashNextName').innerText = "최종 목적지 도착";
                      document.getElementById('dashDist').innerText = "0m";
@@ -733,12 +727,21 @@ function startTracking() {
             }
         }, function(error) {
             console.error("GPS 관제 신호 장애:", error);
-            document.getElementById('speedWarning').innerText = "GPS 신호를 찾을 수 없습니다.";
+            let msg = "GPS 신호를 찾을 수 없습니다.";
+            if (error.code === 1) { 
+                msg = "위치 정보 권한이 차단되었습니다.";
+                alert("⚠️ 위치 정보 권한이 거부되었습니다.\n\n[해결방법]\n1. 스마트폰의 '위치(GPS)' 켜기\n2. 브라우저 설정에서 이 사이트의 위치 권한 '허용' 변경\n3. 카카오톡 내장 브라우저라면 화면 메뉴를 눌러 '다른 브라우저로 열기(Safari/Chrome)'를 선택해주세요.");
+            } else if (error.code === 2) { 
+                msg = "위치 정보를 가져올 수 없습니다. 건물 내부인지 확인해주세요.";
+            }
+            document.getElementById('speedWarning').innerText = msg;
         }, {
             enableHighAccuracy: true,
             maximumAge: 0,
             timeout: 8000
         });
+    } else {
+        alert("사용 중인 브라우저가 GPS 기능을 지원하지 않습니다.");
     }
 }
 
