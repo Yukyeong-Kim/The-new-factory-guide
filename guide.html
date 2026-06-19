@@ -46,8 +46,8 @@ body {
 /* 창고 선택 메뉴 */
 .factory-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
     margin-bottom: 20px;
 }
 
@@ -55,28 +55,29 @@ body {
     background: var(--card-bg);
     border: 1.5px solid #e0e0e0;
     color: #444;
-    padding: 16px 10px;
-    border-radius: 12px;
-    font-size: 0.95rem;
+    padding: 12px 6px;
+    border-radius: 10px;
+    font-size: 0.85rem;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-    transition: all 0.25s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-height: 54px;
 }
 
 .factory-btn.active {
     border-color: var(--primary-color);
     background: #e0f7fa;
     color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(0, 172, 193, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 172, 193, 0.15);
+    transform: translateY(-1px);
 }
 
-/* 🛑 상단 안전 수칙 배너 */
+/* 상단 안전 수칙 배너 */
 .info-banner {
     background: #fff9db;
     border-left: 5px solid #fab005;
@@ -108,7 +109,7 @@ body {
     font-weight: bold;
 }
 
-/* 📟 블랙 전광판 대시보드 */
+/* 블랙 전광판 대시보드 */
 .dashboard {
     background: #212529;
     color: #2b8a3e;
@@ -122,7 +123,7 @@ body {
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
 }
 
-/* 🚗 실시간 속도계 대시보드 */
+/* 실시간 속도계 대시보드 */
 .speed-dashboard {
     background: #343a40;
     color: #ffffff;
@@ -133,7 +134,6 @@ body {
     font-weight: bold;
     display: none;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: box-shadow 0.3s ease;
 }
 
 .speed-value {
@@ -149,7 +149,7 @@ body {
     font-weight: normal;
 }
 
-/* 📸 실시간 교차로 가이드 카드 */
+/* 실시간 교차로 가이드 카드 */
 .guide-card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -197,7 +197,7 @@ body {
     margin: 0;
 }
 
-/* 🗺️ 리플렛 지도 영역 */
+/* 리플렛 지도 영역 */
 .map-wrapper {
     background: var(--card-bg);
     border-radius: 16px;
@@ -214,7 +214,7 @@ body {
     height: 480px;
 }
 
-/* 🗺️ 지도 위 버튼 디자인 */
+/* 지도 위 버튼 디자인 */
 .map-fab-btn {
     position: absolute;
     background: #ffffff;
@@ -232,25 +232,20 @@ body {
     transition: all 0.2s;
     height: 45px;
     padding: 0 20px;
-    right: 15px; 
+    right: 15px;
 }
 
 .route-view-btn {
-    bottom: 80px; 
+    bottom: 80px;
     color: #228be6;
 }
 
 .gps-refresh-btn {
-    bottom: 20px; 
+    bottom: 20px;
     color: #d6336c;
 }
 
-.map-fab-btn span.fab-icon {
-    margin-right: 8px;
-    font-size: 1.1rem;
-}
-
-/* 📌 지도 위 이름표 라벨 디자인 */
+/* 지도 위 이름표 라벨 디자인 */
 .custom-marker-label {
     background: #ffffff;
     border: 1.5px solid #c2185b;
@@ -263,7 +258,7 @@ body {
     white-space: nowrap;
 }
 
-/* ⭐ 별 이모지 깜빡임 애니메이션 */
+/* 별 이모지 깜빡임 애니메이션 */
 @keyframes blink-star {
     0% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(1.3); }
@@ -283,7 +278,7 @@ body {
     height: 100%;
     font-size: 24px;
     animation: blink-star 1.2s infinite;
-    filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.4)); 
+    filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.4));
 }
 </style>
 </head>
@@ -296,18 +291,21 @@ body {
     
     <p style="text-align:left; font-weight:bold; margin-bottom:10px; color:#666;">📍 목적지 창고를 골라주세요</p>
     <div class="factory-grid">
-        <button class="factory-btn" onclick="selectFactory('PO')">PO/HPM 창고</button>
-        <button class="factory-btn" onclick="selectFactory('EVA')">EVA 창고</button>
-        <button class="factory-btn" onclick="selectFactory('PVC')">PVC 창고</button>
-        <button class="factory-btn" onclick="selectFactory('BPA')">BPA 창고</button>
-        <button class="factory-btn" onclick="selectFactory('POE')">POE 창고</button>
-        <button class="factory-btn" onclick="selectFactory('RAW')">원부자재관리실</button>
+        <button class="factory-btn" onclick="selectFactory('PO')">PO/HPM<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('EVA')">EVA<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('PVC')">PVC<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('BPA')">BPA<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('POE')">POE<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('TPEE')">TPEE<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('EQ_CENTRAL')">설비 중앙<br>창고</button>
+        <button class="factory-btn" onclick="selectFactory('EQ_COMP3')">3단지 설비<br>자재창고</button>
+        <button class="factory-btn" onclick="selectFactory('RAW')">원부자재<br>관리실</button>
     </div>
 
     <div class="info-banner">
         <h3>⚠️ 단지 내 운행 안전 수칙</h3>
         <p id="speedNotice">• 현재 구간 규정 속도: <span id="currentSpeedLimit" class="speed-badge">시속 35km 이하</span> 서행 준수</p>
-        <p style="font-weight: bold; color: #d9480f;">• [속도 제한] 서문 보안실부터 <b>본관 앞(또는 방재실)</b> 이전까지는 <span class="speed-badge" style="background-color:#ffec99; color:#d9480f;">시속 35km 이하</span> 주행이 가능하나, 공정 구역에 진입하면 <span class="speed-badge" style="background-color:#ffc9c9; color:#c2185b;">시속 20km 이하</span>로 서행하고, <b>물류 상차장 근접 구간</b>부터는 무조건 <span class="speed-badge" style="background-color:#eebefa; color:#862e9c;">시속 15km 이하</span>로 절대 서행하셔야 합니다.</p>
+        <p style="font-weight: bold; color: #d9480f;">• [속도 제한] 보안문부터 <b>본관 앞(또는 방재실)</b> 이전까지는 <span class="speed-badge" style="background-color:#ffec99; color:#d9480f;">시속 35km 이하</span> 주행이 가능하나, 공정 구역에 진입하면 <span class="speed-badge" style="background-color:#ffc9c9; color:#c2185b;">시속 20km 이하</span>로 서행하고, <b>물류 상차장 근접 구간</b>부터는 무조건 <span class="speed-badge" style="background-color:#eebefa; color:#862e9c;">시속 15km 이하</span>로 절대 서행하셔야 합니다.</p>
     </div>
 
     <div id="dashBoard" class="dashboard" style="display: none;">
@@ -345,19 +343,18 @@ body {
 let map = null;
 let userMarker = null;
 let watchId = null;
-let currentStageIndex = 1; 
+let currentStageIndex = 1;
 let routeStages = [];
 let currentRoadPath = [];
 let polylinePath = null;
 let markerLayerGroup = null;
 let isFirstGpsFix = true;
-let currentUiSpeedLimit = "35km"; // 속도 검사용 전역변수
+let currentUiSpeedLimit = "35km";
 
-// PO/HPM, EVA, PVC에서 공통으로 사용할 115개 경로 데이터
 const commonPath_115 = [
     [36.9925556, 126.3695556], [36.9926475, 126.3697772], [36.9927503, 126.3700025], [36.9928146, 126.3702600], [36.9928489, 126.3705014],
     [36.9928660, 126.3707964], [36.9928703, 126.3710271], [36.9928874, 126.3712041], [36.9929217, 126.3713490], [36.9929303, 126.3715528],
-    [36.9929774, 126.3717459], [36.9929903, 126.3718639], [36.9929903, 126.3720034], [36.9930117, 126.3721912], [36.9930374, 126.3723736],
+    [36.9929774, 126.3714599], [36.9929903, 126.3718639], [36.9929903, 126.3720034], [36.9930117, 126.3721912], [36.9930374, 126.3723736],
     [36.9930246, 126.3724916], [36.9930760, 126.3726203], [36.9931060, 126.3727705], [36.9931060, 126.3729744], [36.9931617, 126.3731514],
     [36.9932045, 126.3733016], [36.9932474, 126.3735001], [36.9933031, 126.3736342], [36.9933502, 126.3738059], [36.9933759, 126.3739614],
     [36.9934230, 126.3741116], [36.9934573, 126.3742726], [36.9935087, 126.3744174], [36.9935473, 126.3745354], [36.9935705, 126.3746577],
@@ -373,80 +370,140 @@ const commonPath_115 = [
     [36.9985206, 126.3796244], [36.9985506, 126.3798282], [36.9985763, 126.3800536], [36.9985934, 126.3802628], [36.9986448, 126.3804237],
     [36.9986619, 126.3805900], [36.9986705, 126.3807617], [36.9986791, 126.3809172], [36.9987005, 126.3810728], [36.9987005, 126.3812230],
     [36.9987348, 126.3813839], [36.9987519, 126.3815234], [36.9987776, 126.3816736], [36.9987862, 126.3819096], [36.9987905, 126.3820652],
-    [36.9988033, 126.3822422], [36.9988462, 126.3823871], [36.9988462, 126.3825695], [36.9988505, 126.3826928], [36.9988719, 126.3828484],
+    [36.9988033, 126.3822422], [36.9988462, 126.3823871], [36.9988462, 126.3825695], [36.9988505, 126.3826928], [36.9987119, 126.3828484],
     [36.9988762, 126.3830523], [36.9989233, 126.3831971], [36.9989276, 126.3833688], [36.9989104, 126.3835297], [36.9989404, 126.3837228],
     [36.9989661, 126.3838677], [36.9989876, 126.3840125], [36.9989444, 126.3841667], [36.9990925, 126.3841198], [36.9991996, 126.3841278],
     [36.9993260, 126.3840903], [36.9994267, 126.3840795], [36.9995424, 126.3840635], [36.9996516, 126.3840366], [36.9997651, 126.3840205],
-    [36.9998722, 126.3840179], [36.9999665, 126.3839830], [37.0000458, 126.3839588], [37.0000833, 126.3839167], [37.0000833, 126.3839167]
+    [36.9998722, 126.3840179], [36.9999665, 126.3839830], [37.0000458, 126.3839588], [37.0000833, 126.3839167]
 ];
 
-// 🗺️ 정밀 도로 매핑 데이터 (선행 안내 방식 완벽 적용)
-// 💡 nextTitle, nextText, nextImg는 '해당 포인트를 지날 때 띄워줄 [다음 목표 지점]에 대한 안내'입니다.
+// 마스터 공장 맵핑 가이드
 const factoryData = {
-    // 🏭 PO/HPM 경로
     'PO': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 방면 이동", nextText: "방재실 앞 사거리를 통과 중입니다. 지금부터 시속 20km 이하로 서행하세요. 다음 교차로인 **파이프랙 밑에서 우회전**하세요.", nextImg: "piperack.png" },
-            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🛑 3단계: 물류 구역 진입", nextText: "우회전 후 직진 중입니다. 전방 물류 상차장 부근 갈림길에서 **좌회전**을 준비하세요.", nextImg: "left.png" },
-            { name: "(좌회전) 구간", lat: 36.9989444, lon: 126.3841667, radius: 25, speedLimit: "15km", nextTitle: "🏁 4단계: PO/HPM 창고 도착 준비", nextText: "좌회전하셨습니다. 정면에 보이는 **PO/HPM 출하 창고**로 안전하게 진입하세요.", nextImg: "arrival.png" },
-            { name: "PO/HPM 창고 (도착)", lat: 37.0000833, lon: 126.3839167, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "PO/HPM 창고에 안전하게 도착했습니다. 수고하셨습니다!", nextImg: "arrival.png" }
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "서문 보안실을 통과했습니다. 정면 **방재실 사거리 교차로**를 향해 직진하세요.", nextImg: "po_01_room.png" },
+            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 하부 우회전 준비", nextText: "방재실 앞 사거리를 지났습니다. 시속 20km 이하로 감속하고 전방 **파이프랙 하부에서 우회전** 하세요.", nextImg: "po_02_piperack.png" },
+            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🛑 3단계: 물류 구역 좌회전 분기점", nextText: "우회전 구간을 통과했습니다. 전방 상차장 밀집 지역 갈림길에서 **좌회전**할 준비를 하십시오.", nextImg: "po_03_left.png" },
+            { name: "(좌회전) 구간", lat: 36.9989444, lon: 126.3841667, radius: 25, speedLimit: "15km", nextTitle: "🏁 4단계: PO/HPM 창고 진입", nextText: "좌회전을 완료했습니다. 정면에 위치한 **PO/HPM 출하 창고** 내부로 감속하여 안전하게 주차해 주세요.", nextImg: "po_04_arrival.png" },
+            { name: "PO/HPM 창고 (도착)", lat: 37.0000833, lon: 126.3839167, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "PO/HPM 창고에 안전하게 도착했습니다. 상차 업무를 시작하세요.", nextImg: "po_04_arrival.png" }
         ],
         roadPath: commonPath_115
     },
-    // 🏭 EVA 경로
     'EVA': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 방면 이동", nextText: "방재실 앞 사거리를 통과 중입니다. 지금부터 시속 20km 이하로 서행하세요. 다음 교차로인 **파이프랙 밑에서 우회전**하세요.", nextImg: "piperack.png" },
-            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "20km", nextTitle: "🏁 3단계: EVA 창고 도착 준비", nextText: "우회전 후 직진하시면 곧 **EVA 창고** 목적지가 나타납니다. 15km 이하로 감속해주세요.", nextImg: "eva_arrival.png" },
-            { name: "EVA 창고 (도착)", lat: 36.99866, lon: 126.38091, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "EVA 창고에 안전하게 도착했습니다. 수고하셨습니다!", nextImg: "eva_arrival.png" }
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "서문을 통과했습니다. 전방 **방재실 사거리**까지 직선 주행하세요.", nextImg: "eva_01_room.png" },
+            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 파이프랙 하부 우회전", nextText: "방재실 교차로를 통과했습니다. 공정 지역이므로 20km 이하 서행하며 **파이프랙 밑에서 우회전** 하세요.", nextImg: "eva_02_piperack.png" },
+            { name: "파이프랙 밑 (우회전)", lat: 36.9978889, lon: 126.3740000, radius: 40, speedLimit: "15km", nextTitle: "🏁 3단계: EVA 창고 최종 진입", nextText: "우회전했습니다. 상차장 근접 구역이므로 15km 이하로 절대 서행하여 **우측 EVA 창고**로 진입하세요.", nextImg: "eva_03_arrival.png" },
+            { name: "EVA 창고 (도착)", lat: 36.99866, lon: 126.38091, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "EVA 창고에 도착했습니다. 안내를 종료합니다.", nextImg: "eva_03_arrival.png" }
         ],
         roadPath: commonPath_115
     },
-    // 🏭 PVC 경로 (💡 방재실 이후 속도 15km로 조정됨)
     'PVC': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
-            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "15km", nextTitle: "🏁 2단계: PVC 창고 도착 준비", nextText: "방재실 앞 사거리를 지납니다. 물류 상차장에 근접했으므로 **시속 15km 이하로 절대 서행**하세요. 직진하시면 곧 전방에 **PVC 창고** 목적지가 나타납니다.", nextImg: "pvc_arrival.png" },
-            { name: "PVC 창고 (도착)", lat: 36.99652, lon: 126.37408, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "PVC 창고에 안전하게 도착했습니다. 수고하셨습니다!", nextImg: "pvc_arrival.png" }
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "사내 도로에 진입했습니다. 규정속도를 준수하여 **방재실 사거리**로 이동하세요.", nextImg: "pvc_01_room.png" },
+            { name: "방재실 (직진)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "15km", nextTitle: "🏁 2단계: 물류 상차장 진입 서행", nextText: "방재실을 통과했습니다. 지금부터 물류 근접 구역이므로 **시속 15km 이하로 절대 서행**하며 직진 후 **PVC 창고**로 접근하세요.", nextImg: "pvc_02_arrival.png" },
+            { name: "PVC 창고 (도착)", lat: 36.99652, lon: 126.37408, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "PVC 창고에 도착했습니다. 안전벨트를 풀기 전 주변 차량 통행에 주의하세요.", nextImg: "pvc_02_arrival.png" }
         ],
         roadPath: commonPath_115
     },
-    // 📦 원부자재관리실(RAW) 경로
-    'RAW': {
+    'BPA': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **우회전**하세요.", nextImg: "raw_room.png" }, 
-            { name: "방재실 (우회전)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 본관 방면 이동", nextText: "방재실 사거리에서 우회전 하셨습니다. 다음 교차로인 **본관 앞에서는 직진**하세요. (이곳까지는 35km 유지 가능)", nextImg: "raw_main.png" },
-            { name: "본관 앞 (직진)", lat: 36.9969500, lon: 126.3803000, radius: 50, speedLimit: "20km", nextTitle: "👉 3단계: 플레어스택 다리 방면 이동", nextText: "본관 앞을 지납니다. 지금부터는 공정 구역이므로 **20km/h로 감속** 하세요. 전방 **플레어스택 다리 앞에서 좌회전**을 준비하세요.", nextImg: "raw_left.png" },
-            { name: "플레어스택 다리 앞 (좌회전)", lat: 36.9964600, lon: 126.3838100, radius: 40, speedLimit: "15km", nextTitle: "👉 4단계: 차량 정비 창고 직진", nextText: "좌회전하셨습니다. 15km 이하로 속도를 줄이고 **차량 정비 창고 앞을 지나 계속 직진**하세요.", nextImg: "raw_straight.png" },
-            { name: "차량 정비 창고 앞 (직진)", lat: 37.0008096, lon: 126.3870607, radius: 40, speedLimit: "15km", nextTitle: "🏁 5단계: 원부자재 관리실 도착 준비", nextText: "정비 창고 앞을 지납니다. 곧 목적지인 **원부자재 관리실**이 나타납니다.", nextImg: "raw_arrival.png" },
-            { name: "원부자재 관리실 (도착)", lat: 37.0024200, lon: 126.3855400, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "원부자재 관리실에 안전하게 도착했습니다!", nextImg: "raw_arrival.png" }
+            { name: "서문 (출발)", lat: 36.99255, lon: 126.36955, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 교차로 직진", nextText: "서문 통과 완료. **방재실 사거리**를 지나 정면 방향으로 곧장 이동하세요.", nextImg: "bpa_01_room.png" },
+            { name: "방재실 (직진)", lat: 36.99450, lon: 126.37458, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: BPA 출하 창고 정문 이동", nextText: "방재실을 지났습니다. 공정 통로 주행 중이오니 감속하시고 전방 지정된 **BPA 창고 하차장** 내부로 우선 진입하세요.", nextImg: "bpa_02_warehouse.png" },
+            { name: "BPA 창고 (도착)", lat: 36.995166, lon: 126.37450, radius: 40, speedLimit: "15km", nextTitle: "🔄 3단계: 서류 제출용 BPA 사무실로 이동", nextText: "상/하차 후 서류 처리를 위해 사무실로 가세요.", nextImg: "bpa_03_office_arrival.png" },
+            { name: "BPA 사무실 (도착)", lat: 36.995083, lon: 126.375694, radius: 30, speedLimit: "15km", nextTitle: "🏁 최종 운행 종료", nextText: "서류 제출처인 BPA 사무실에 최종 도착하였습니다. 안내를 마칩니다.", nextImg: "bpa_03_office_arrival.png" }
         ],
         roadPath: [
-            [36.9925556, 126.3695556], [36.9926475, 126.3697772], [36.9927503, 126.3700025], [36.9928146, 126.3702600], [36.9928489, 126.3705014], 
-            [36.9928660, 126.3707964], [36.9928703, 126.3710271], [36.9928874, 126.3712041], [36.9929217, 126.3713490], [36.9929303, 126.3715528], 
-            [36.9929774, 126.3717459], [36.9929903, 126.3718639], [36.9929903, 126.3720034], [36.9930117, 126.3721912], [36.9930374, 126.3723736], 
-            [36.9930246, 126.3724916], [36.9930760, 126.3726203], [36.9931060, 126.3727705], [36.9931060, 126.3729744], [36.9931617, 126.3731514], 
-            [36.9932045, 126.3733016], [36.9932474, 126.3735001], [36.9933031, 126.3736342], [36.9933502, 126.3738059], [36.9933759, 126.3739614], 
-            [36.9934230, 126.3741116], [36.9934573, 126.3742726], [36.9935087, 126.3744174], [36.9935473, 126.3745354], [36.9935705, 126.3746577], 
-            [36.9937119, 126.3746856], [36.9938747, 126.3747232], [36.9940761, 126.3746803], [36.9942346, 126.3746534], [36.9943524, 126.3746213], 
-            [36.9944510, 126.3745971], [36.9945000, 126.3745833], [36.9945549, 126.3745596], [36.9946245, 126.3745421], [36.9948049, 126.3749555], 
-            [36.9948906, 126.3754812], [36.9950020, 126.3760966], [36.9950963, 126.3768369], [36.9952291, 126.3774484], [36.9954690, 126.3780010], 
-            [36.9957304, 126.3786071], [36.9960446, 126.3791060], [36.9964859, 126.3795781], [36.9968594, 126.3800487], [36.9969500, 126.3803000], 
-            [36.9972964, 126.3809607], [36.9973607, 126.3815347], [36.9972793, 126.3821248], [36.9972064, 126.3826612], [36.9970651, 126.3831601], 
-            [36.9967780, 126.3837019], [36.9964600, 126.3838100], [36.9967201, 126.3843296], [36.9969001, 126.3850914], [36.9970200, 126.3858424], 
-            [36.9971571, 126.3865237], [36.9973781, 126.3871590], [36.9977037, 126.3874486], [36.9980550, 126.3877169], [36.9982992, 126.3878778], 
-            [36.9986520, 126.3878027], [36.9991602, 126.3876669], [36.9997642, 126.3875542], [37.0003040, 126.3873021], [37.0008096, 126.3870607], 
+            [36.99255, 126.36955], [36.9927453, 126.3702343], [36.9928481, 126.3710604],
+            [36.9929081, 126.371967], [36.9930495, 126.3728628], [36.9934442, 126.3742076],
+            [36.993637, 126.3746313], [36.9945, 126.37458], [36.9951666, 126.3745],
+            [36.9947362, 126.3746137], [36.9949204, 126.3757564], [36.9950833, 126.3756944]
+        ]
+    },
+    // ⭐ POE 창고 (직진 1장 연동)
+    'POE': {
+        stages: [
+            { name: "남문 (출발)", lat: 36.993611, lon: 126.388722, radius: 50, speedLimit: "20km", nextTitle: "👉 1단계: POE 창고 직진", nextText: "남문 진입 후 바로 직진입니다. 전방에 보이는 **POE 창고**로 이동하세요.", nextImg: "poe_01_arrival.png" },
+            { name: "POE 창고 (도착)", lat: 36.993177, lon: 126.386534, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "POE 창고 목적지에 도착했습니다.", nextImg: "poe_01_arrival.png" }
+        ],
+        roadPath: [
+            [36.9936111, 126.3887222], [36.993177, 126.3865348]
+        ]
+    },
+    // ⭐ TPEE 창고 (직진-직진-도착 3장 연동)
+    'TPEE': {
+        stages: [
+            { name: "서문 (출발)", lat: 36.99255, lon: 126.36955, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "서문 보안실 확인 완료. 정면 **방재실 방향**으로 직진하세요.", nextImg: "tpee_01_room.png" },
+            { name: "방재실 (직진)", lat: 36.99450, lon: 126.37458, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: 다음 사거리까지 직진", nextText: "방재실을 통과했습니다. 전방 사거리까지 20km 이하로 안전하게 직진하세요.", nextImg: "tpee_02_straight.png" },
+            { name: "사거리 (직진)", lat: 36.997638, lon: 126.373833, radius: 40, speedLimit: "15km", nextTitle: "🏁 3단계: TPEE 창고 진입", nextText: "사거리를 지났습니다. 우측의 **TPEE 창고** 방향으로 서행하여 진입하세요.", nextImg: "tpee_03_arrival.png" },
+            { name: "TPEE 창고 (도착)", lat: 36.99800, lon: 126.37375, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "TPEE 제품 출하 창고에 도착하였습니다.", nextImg: "tpee_03_arrival.png" }
+        ],
+        roadPath: [
+            [36.99255, 126.36955], [36.9927453, 126.3702343], [36.9928481, 126.3710604],
+            [36.9929081, 126.371967], [36.9930495, 126.3728628], [36.9934442, 126.3742076],
+            [36.993637, 126.3746313], [36.9945, 126.37458], [36.995168, 126.3744152],
+            [36.996509, 126.3740933], [36.9976388, 126.3738333], [36.998, 126.37375]
+        ]
+    },
+    // ⭐ 설비 중앙 창고 (직진-우회전-좌회전-도착 4장 연동)
+    'EQ_CENTRAL': {
+        stages: [
+            { name: "서문 (출발)", lat: 36.99255, lon: 126.36955, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "서문 통과 후 **방재실 방향**으로 직진하세요.", nextImg: "eqc_01_room.png" },
+            { name: "방재실 (직진)", lat: 36.99450, lon: 126.37458, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: HVO 삼거리 우회전", nextText: "방재실에서 직진 후, 전방의 **HVO 삼거리에서 우회전** 하세요.", nextImg: "eqc_02_hvo_turn.png" },
+            { name: "HVO 삼거리 (우회전)", lat: 36.997342, lon: 126.373867, radius: 40, speedLimit: "20km", nextTitle: "👉 3단계: 공무동 정비샵 삼거리 좌회전", nextText: "우회전하셨습니다. 다음 **공무동 정비샵 삼거리에서 좌회전** 하세요.", nextImg: "eqc_03_shop_turn.png" },
+            { name: "정비샵 삼거리 (좌회전)", lat: 36.998641, lon: 126.373562, radius: 40, speedLimit: "15km", nextTitle: "🏁 4단계: 설비 중앙 창고 진입", nextText: "좌회전 후 목적지인 **설비 중앙 창고**로 진입하세요.", nextImg: "eqc_04_arrival.png" },
+            { name: "설비 중앙 창고 (도착)", lat: 36.999916, lon: 126.373277, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "설비 중앙 창고에 도착했습니다.", nextImg: "eqc_04_arrival.png" }
+        ],
+        roadPath: [
+            [36.99255, 126.36955], [36.9927453, 126.3702343], [36.9928481, 126.3710604],
+            [36.9929081, 126.371967], [36.9930495, 126.3728628], [36.9934442, 126.3742076],
+            [36.993637, 126.3746313], [36.9945, 126.37458], [36.995415, 126.3743202],
+            [36.9963011, 126.3741301], [36.9973422, 126.3738673], [36.9986419, 126.3735629],
+            [36.9999166, 126.3732777]
+        ]
+    },
+    // ⭐ 3단지 설비 자재 창고 (도착 1장 연동)
+    'EQ_COMP3': {
+        stages: [
+            { name: "남문 (출발)", lat: 36.993611, lon: 126.388722, radius: 50, speedLimit: "20km", nextTitle: "👉 1단계: 3단지 설비 자재 창고 진입", nextText: "남문 진입 후 바로 **우회전**하여 조금만 이동하시면 목적지입니다.", nextImg: "eq3_01_arrival.png" },
+            { name: "3단지 설비 자재 창고 (도착)", lat: 36.994027, lon: 126.388611, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "3단지 설비 자재 창고에 도착했습니다.", nextImg: "eq3_01_arrival.png" }
+        ],
+        roadPath: [
+            [36.9936111, 126.3887222], [36.9936342, 126.3885977], [36.9936567, 126.3885146],
+            [36.9937895, 126.3885494], [36.9939202, 126.3885843], [36.9940277, 126.3886111]
+        ]
+    },
+    'RAW': {
+        stages: [
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 사거리 우회전", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **우회전**하세요.", nextImg: "raw_01_room.png" },
+            { name: "방재실 (우회전)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 본관 전방 교차로 직진", nextText: "방재실 사거리에서 우회전 하셨습니다. 다음 교차로인 **본관 앞에서는 직진**하세요.", nextImg: "raw_02_main.png" },
+            { name: "본관 앞 (직진)", lat: 36.9969500, lon: 126.3803000, radius: 50, speedLimit: "20km", nextTitle: "👉 3단계: 플레어스택 교량 좌회전", nextText: "본관 앞을 통과합니다. 고위험 공정 내부 구역이므로 **시속 20km 이하로 감속**하고 전방 **플레어스택 다리 앞에서 좌회전** 하세요.", nextImg: "raw_03_left.png" },
+            { name: "플레어스택 다리 앞 (좌회전)", lat: 36.9964600, lon: 126.3838100, radius: 40, speedLimit: "15km", nextTitle: "👉 4단계: 사내 정비 창고 통과", nextText: "좌회전 처리가 완료되었습니다. 안전계수를 높이고 **차량 정비 창고 우측 통로를 경유해 전방으로 직진**하세요.", nextImg: "raw_04_straight.png" },
+            { name: "차량 정비 창고 앞 (직진)", lat: 37.0008096, lon: 126.3870607, radius: 40, speedLimit: "15km", nextTitle: "🏁 5단계: 원부자재 관리실 하차 구역 진입", nextText: "정비공장 측면 통로 통과 중입니다. 잠시 후 종착지인 **원부자재 관리실** 도크 셔터 앞에 정차하십시오.", nextImg: "raw_05_arrival.png" },
+            { name: "원부자재 관리실 (도착)", lat: 37.0024200, lon: 126.3855400, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "원부자재 관리실에 최종 도달하였습니다. 인계서 인수를 확인해 주세요.", nextImg: "raw_05_arrival.png" }
+        ],
+        roadPath: [
+            [36.9925556, 126.3695556], [36.9926475, 126.3697772], [36.9927503, 126.3700025], [36.9928146, 126.3702600], [36.9928489, 126.3705014],
+            [36.9928660, 126.3707964], [36.9928703, 126.3710271], [36.9928874, 126.3712041], [36.9929217, 126.3713490], [36.9929303, 126.3715528],
+            [36.9929774, 126.3717459], [36.9929903, 126.3718639], [36.9929903, 126.3720034], [36.9930117, 126.3721912], [36.9930374, 126.3723736],
+            [36.9930246, 126.3724916], [36.9930760, 126.3726203], [36.9931060, 126.3727705], [36.9931060, 126.3729744], [36.9931617, 126.3731514],
+            [36.9932045, 126.3733016], [36.9932474, 126.3735001], [36.9933031, 126.3736342], [36.9933502, 126.3738059], [36.9933759, 126.3739614],
+            [36.9934230, 126.3741116], [36.9934573, 126.3742726], [36.9935087, 126.3744174], [36.9935473, 126.3745354], [36.9935705, 126.3746577],
+            [36.9937119, 126.3746856], [36.9938747, 126.3747232], [36.9940761, 126.3746803], [36.9942346, 126.3746534], [36.9943524, 126.3746213],
+            [36.9944510, 126.3745971], [36.9945000, 126.3745833], [36.9945549, 126.3745596], [36.9946245, 126.3745421], [36.9948049, 126.3749555],
+            [36.9948906, 126.3754812], [36.9950020, 126.3760966], [36.9950963, 126.3768369], [36.9952291, 126.3774484], [36.9954690, 126.3780010],
+            [36.9957304, 126.3786071], [36.9960446, 126.3791060], [36.9964859, 126.3795781], [36.9968594, 126.3800487], [36.9969500, 126.3803000],
+            [36.9972964, 126.3809607], [36.9973607, 126.3815347], [36.9972793, 126.3821248], [36.9972064, 126.3826612], [36.9970651, 126.3831601],
+            [36.9967780, 126.3830199], [36.9964600, 126.3838100], [36.9967201, 126.3843296], [36.9969001, 126.3850914], [36.9970200, 126.3858424],
+            [36.9971571, 126.3865237], [36.9973781, 126.3871590], [36.9977037, 126.3874486], [36.9980550, 126.3877169], [36.9982992, 126.3878778],
+            [36.9986520, 126.3878027], [36.9991602, 126.3876669], [36.9997642, 126.3875542], [37.0003040, 126.3873021], [37.0008096, 126.3870607],
             [37.0014494, 126.3866849], [37.0017407, 126.3861056], [37.0020663, 126.3856335], [37.0024200, 126.3855400]
         ]
     }
 };
 
-// ✂️ 목적지 이후의 파란색 경로를 잘라내는 똑똑한 함수
 function truncatePathToDestination(pathCoords, lastStage) {
     if (!pathCoords || pathCoords.length === 0) return [];
-    
     let targetLatLng = L.latLng(lastStage.lat, lastStage.lon);
     let minTargetDist = Infinity;
     let targetIdx = pathCoords.length - 1;
@@ -464,7 +521,6 @@ function truncatePathToDestination(pathCoords, lastStage) {
 
 function getRouteDistance(userLatLng, targetLatLng, pathCoords) {
     if (!pathCoords || pathCoords.length === 0) return userLatLng.distanceTo(targetLatLng);
-
     let minUserDist = Infinity;
     let closestUserIdx = 0;
     for (let i = 0; i < pathCoords.length; i++) {
@@ -500,7 +556,6 @@ function getRouteDistance(userLatLng, targetLatLng, pathCoords) {
 
 function findNextStageByLocation(userLatLng) {
     if (!currentRoadPath || currentRoadPath.length === 0) return 1;
-
     let minUserDist = Infinity;
     let closestUserIdx = 0;
     for (let i = 0; i < currentRoadPath.length; i++) {
@@ -511,14 +566,12 @@ function findNextStageByLocation(userLatLng) {
             closestUserIdx = i;
         }
     }
-
     if (minUserDist > 1000) return 1;
 
     for (let s = 1; s < routeStages.length; s++) {
         let stageLatLng = L.latLng(routeStages[s].lat, routeStages[s].lon);
         let minStageDist = Infinity;
         let closestStageIdx = 0;
-        
         for (let i = 0; i < currentRoadPath.length; i++) {
             let pt = L.latLng(currentRoadPath[i][0], currentRoadPath[i][1]);
             let d = stageLatLng.distanceTo(pt);
@@ -529,25 +582,24 @@ function findNextStageByLocation(userLatLng) {
         }
         if (closestStageIdx > closestUserIdx) return s;
     }
-    return routeStages.length - 1; 
+    return routeStages.length - 1;
 }
 
-// 🚦 구간 속도 제한 UI 업데이트 함수
 function updateSpeedLimitUI(speedLimit) {
     currentUiSpeedLimit = speedLimit;
+    const badge = document.getElementById('currentSpeedLimit');
     if (speedLimit === "15km") {
-        document.getElementById('currentSpeedLimit').innerText = "시속 15km 이하 (상차장 근접 절대 서행)";
-        document.getElementById('currentSpeedLimit').style.cssText = "background-color: #eebefa; color: #862e9c;";
+        badge.innerText = "시속 15km 이하 (상차장 근접 절대 서행)";
+        badge.style.cssText = "background-color: #eebefa; color: #862e9c;";
     } else if (speedLimit === "20km") {
-        document.getElementById('currentSpeedLimit').innerText = "시속 20km 이하 (공정 구역 서행)";
-        document.getElementById('currentSpeedLimit').style.cssText = "background-color: #ffc9c9; color: #c2185b;";
+        badge.innerText = "시속 20km 이하 (공정 구역 서행)";
+        badge.style.cssText = "background-color: #ffc9c9; color: #c2185b;";
     } else {
-        document.getElementById('currentSpeedLimit').innerText = "시속 35km 이하 (일반 도로)";
-        document.getElementById('currentSpeedLimit').style.cssText = "background-color: #ffec99; color: #d9480f;";
+        badge.innerText = "시속 35km 이하 (일반 도로)";
+        badge.style.cssText = "background-color: #ffec99; color: #d9480f;";
     }
 }
 
-// 🖥️ 가이드 UI 업데이트
 function updateGuideUI(index) {
     if (index >= routeStages.length) return;
     const guide = routeStages[index];
@@ -575,8 +627,8 @@ function selectFactory(code) {
     }
 
     const data = factoryData[code];
-    currentStageIndex = 1; 
-    isFirstGpsFix = true; 
+    currentStageIndex = 1;
+    isFirstGpsFix = true;
     routeStages = data.stages;
     
     const lastStage = routeStages[routeStages.length - 1];
@@ -586,7 +638,7 @@ function selectFactory(code) {
     document.getElementById('guideCard').style.display = 'block';
     document.getElementById('speedDashboard').style.display = 'block';
     
-    updateGuideUI(0); 
+    updateGuideUI(0);
     updateSpeedLimitUI(routeStages[0].speedLimit);
 
     document.getElementById('mapWrapper').style.display = 'block';
@@ -596,8 +648,9 @@ function selectFactory(code) {
         map = null;
     }
     
+    userMarker = null; 
+   
     map = L.map('map', {
-        center: [36.9955, 126.3765],
         zoom: 15,
         zoomControl: true,
         attributionControl: false
@@ -618,6 +671,8 @@ function selectFactory(code) {
         weight: 7,
         opacity: 0.9
     }).addTo(map);
+
+    map.fitBounds(polylinePath.getBounds(), { padding: [20, 20] });
 
     if (markerLayerGroup) map.removeLayer(markerLayerGroup);
     markerLayerGroup = L.layerGroup().addTo(map);
@@ -645,14 +700,12 @@ function startTracking() {
             const userLon = position.coords.longitude;
             const userLatLng = L.latLng(userLat, userLon);
 
-            // 🚗 속도 계산 로직
-            const speedMps = position.coords.speed || 0; 
-            const speedKmph = Math.round(speedMps * 3.6); 
+            const speedMps = position.coords.speed || 0;
+            const speedKmph = Math.round(speedMps * 3.6);
             const speedLimitNum = parseInt(currentUiSpeedLimit);
 
             document.getElementById('currentSpeed').innerText = speedKmph;
 
-            // 🚨 속도 위반 경고
             if (speedKmph > speedLimitNum) {
                 document.getElementById('currentSpeed').style.color = '#ff6b6b';
                 document.getElementById('speedWarning').innerText = `⚠️ 제한 속도(${speedLimitNum}km/h) 초과! 속도를 줄이세요!`;
@@ -683,11 +736,11 @@ function startTracking() {
                 const starIcon = L.divIcon({
                     html: '<div class="star-emoji">⭐</div>',
                     className: 'blinking-star-icon',
-                    iconSize: [24, 24], 
-                    iconAnchor: [12, 12] 
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
                 });
 
-                userMarker = L.marker([userLat, userLon], { 
+                userMarker = L.marker([userLat, userLon], {
                     icon: starIcon,
                     pane: 'userMarkerPane'
                 }).addTo(map);
@@ -706,14 +759,13 @@ function startTracking() {
             document.getElementById('dashNextName').innerText = currentTarget.name;
             document.getElementById('dashDist').innerText = Math.round(routeDistance) + "m";
 
-            let uiSpeedLimit = routeStages[currentStageIndex - 1].speedLimit; 
+            let uiSpeedLimit = routeStages[currentStageIndex - 1].speedLimit;
 
-            if ((currentTarget.name.includes("좌회전") || currentTarget.name.includes("도착")) && routeDistance <= 300) {
+            if ((currentTarget.name.includes("좌회전") || currentTarget.name.includes("도착") || currentTarget.name.includes("우회전")) && routeDistance <= 300) {
                 uiSpeedLimit = "15km";
             }
             updateSpeedLimitUI(uiSpeedLimit);
 
-            // 목적지 반경 통과 시
             if (straightDistance <= currentTarget.radius) {
                 updateGuideUI(currentStageIndex);
                 document.getElementById('guideCard').scrollIntoView({ behavior: 'smooth' });
@@ -728,11 +780,11 @@ function startTracking() {
         }, function(error) {
             console.error("GPS 관제 신호 장애:", error);
             let msg = "GPS 신호를 찾을 수 없습니다.";
-            if (error.code === 1) { 
+            if (error.code === 1) {
                 msg = "위치 정보 권한이 차단되었습니다.";
-                alert("⚠️ 위치 정보 권한이 거부되었습니다.\n\n[해결방법]\n1. 스마트폰의 '위치(GPS)' 켜기\n2. 브라우저 설정에서 이 사이트의 위치 권한 '허용' 변경\n3. 카카오톡 내장 브라우저라면 화면 메뉴를 눌러 '다른 브라우저로 열기(Safari/Chrome)'를 선택해주세요.");
-            } else if (error.code === 2) { 
-                msg = "위치 정보를 가져올 수 없습니다. 건물 내부인지 확인해주세요.";
+                alert("⚠️ 위치 정보 권한이 거부되었습니다.\n\n[해결방법]\n1. 스마트폰의 '위치(GPS)' 켜기\n2. 브라우저 설정에서 이 사이트의 위치 권한 '허용' 변경\n3. 타 브라우저(Chrome/Safari) 앱으로 재접속해 보세요.");
+            } else if (error.code === 2) {
+                msg = "위치 신호 불량 (건물 외부에서 시도 필요)";
             }
             document.getElementById('speedWarning').innerText = msg;
         }, {
@@ -741,7 +793,7 @@ function startTracking() {
             timeout: 8000
         });
     } else {
-        alert("사용 중인 브라우저가 GPS 기능을 지원하지 않습니다.");
+        alert("사용 중인 기기가 GPS 기능을 제공하지 않습니다.");
     }
 }
 
@@ -749,7 +801,7 @@ function centerMyLocation() {
     if (userMarker) {
         map.flyTo(userMarker.getLatLng(), map.getZoom(), { animate: true, duration: 1.2 });
     } else {
-        alert("📡 위성 GPS 신호를 수신 중입니다. 잠시만 기다려 주세요.");
+        alert("📡 위성 GPS 관제 수신 신호를 대기 중입니다.");
     }
 }
 
@@ -757,7 +809,7 @@ function viewEntireRoute() {
     if (polylinePath && map) {
         map.flyToBounds(polylinePath.getBounds(), { animate: true, duration: 1.2, padding: [10, 10] });
     } else {
-        alert("목적지 창고를 먼저 선택해 주세요.");
+        alert("목적지 창고를 선택하시면 전체 노선 배정이 시작됩니다.");
     }
 }
 </script>
