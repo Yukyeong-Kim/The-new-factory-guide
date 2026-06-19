@@ -377,9 +377,8 @@ const commonPath_115 = [
     [36.9998722, 126.3840179], [36.9999665, 126.3839830], [37.0000458, 126.3839588], [37.0000833, 126.3839167]
 ];
 
-// 마스터 공장 맵핑 가이드 (기존 공장 원복 & 신규 공장 연동)
+// 마스터 공장 맵핑 가이드
 const factoryData = {
-    // 💡 기존 공장(PO) 원복 완료 (room, piperack, left, arrival)
     'PO': {
         stages: [
             { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
@@ -390,7 +389,6 @@ const factoryData = {
         ],
         roadPath: commonPath_115
     },
-    // 💡 기존 공장(EVA) 원복 완료 (room, piperack, eva_arrival)
     'EVA': {
         stages: [
             { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
@@ -400,7 +398,6 @@ const factoryData = {
         ],
         roadPath: commonPath_115
     },
-    // 💡 기존 공장(PVC) 원복 완료 (room, pvc_arrival)
     'PVC': {
         stages: [
             { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **직진**하세요.", nextImg: "room.png" },
@@ -409,7 +406,6 @@ const factoryData = {
         ],
         roadPath: commonPath_115
     },
-    // ⭐ BPA 창고 
     'BPA': {
         stages: [
             { name: "서문 (출발)", lat: 36.99255, lon: 126.36955, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 교차로 직진", nextText: "서문 통과 완료. **방재실 사거리**를 지나 정면 방향으로 곧장 이동하세요.", nextImg: "bpa_01_room.png" },
@@ -424,7 +420,6 @@ const factoryData = {
             [36.9947362, 126.3746137], [36.9949204, 126.3757564], [36.9950833, 126.3756944]
         ]
     },
-    // ⭐ POE 창고
     'POE': {
         stages: [
             { name: "남문 (출발)", lat: 36.993611, lon: 126.388722, radius: 50, speedLimit: "20km", nextTitle: "👉 1단계: POE 창고 직진", nextText: "남문 진입 후 바로 직진입니다. 전방에 보이는 **POE 창고**로 이동하세요.", nextImg: "poe_01_arrival.png" },
@@ -434,7 +429,6 @@ const factoryData = {
             [36.9936111, 126.3887222], [36.993177, 126.3865348]
         ]
     },
-    // ⭐ TPEE 창고
     'TPEE': {
         stages: [
             { name: "서문 (출발)", lat: 36.99255, lon: 126.36955, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "서문 보안실 확인 완료. 정면 **방재실 방향**으로 직진하세요.", nextImg: "tpee_01_room.png" },
@@ -449,24 +443,25 @@ const factoryData = {
             [36.996509, 126.3740933], [36.9976388, 126.3738333], [36.998, 126.37375]
         ]
     },
-    // ⭐ 설비 중앙 창고
+    // ⭐ 설비 중앙 창고 (경로 좌표 누락 완벽 수정됨)
     'EQ_CENTRAL': {
         stages: [
             { name: "서문 (출발)", lat: 36.99255, lon: 126.36955, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 직진", nextText: "서문 통과 후 **방재실 방향**으로 직진하세요.", nextImg: "eqc_01_room.png" },
-            { name: "방재실 (직진)", lat: 36.99450, lon: 126.37458, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: HVO 삼거리 우회전", nextText: "방재실에서 직진 후, 전방의 **HVO 삼거리에서 우회전** 하세요.", nextImg: "eqc_02_hvo_turn.png" },
-            { name: "HVO 삼거리 (우회전)", lat: 36.997342, lon: 126.373867, radius: 40, speedLimit: "20km", nextTitle: "👉 3단계: 공무동 정비샵 삼거리 좌회전", nextText: "우회전하셨습니다. 다음 **공무동 정비샵 삼거리에서 좌회전** 하세요.", nextImg: "eqc_03_shop_turn.png" },
-            { name: "정비샵 삼거리 (좌회전)", lat: 36.998641, lon: 126.373562, radius: 40, speedLimit: "15km", nextTitle: "🏁 4단계: 설비 중앙 창고 진입", nextText: "좌회전 후 목적지인 **설비 중앙 창고**로 진입하세요.", nextImg: "eqc_04_arrival.png" },
-            { name: "설비 중앙 창고 (도착)", lat: 36.999916, lon: 126.373277, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "설비 중앙 창고에 도착했습니다.", nextImg: "eqc_04_arrival.png" }
+            { name: "방재실 (우회전)", lat: 36.99450, lon: 126.37458, radius: 50, speedLimit: "20km", nextTitle: "👉 2단계: HVO 삼거리 우회전", nextText: "방재실에서 우회전 후 직진하다가, 전방의 **HVO 삼거리에서 우회전** 하세요.", nextImg: "eqc_02_hvo_turn.png" },
+            { name: "HVO 삼거리 (우회전)", lat: 36.9999166, lon: 126.3732777, radius: 40, speedLimit: "20km", nextTitle: "👉 3단계: 공무동 정비샵 삼거리 좌회전", nextText: "HVO 삼거리에서 우회전하셨습니다. 다음 **공무동 정비샵 삼거리에서 좌회전** 하세요.", nextImg: "eqc_03_shop_turn.png" },
+            { name: "정비샵 삼거리 (좌회전)", lat: 37.0005555, lon: 126.3772777, radius: 40, speedLimit: "15km", nextTitle: "🏁 4단계: 설비 중앙 창고 진입", nextText: "정비샵 앞에서 좌회전 후 목적지인 **설비 중앙 창고**로 진입하세요.", nextImg: "eqc_04_arrival.png" },
+            { name: "설비 중앙 창고 (도착)", lat: 37.0013888, lon: 126.3770277, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "설비 중앙 창고에 도착했습니다.", nextImg: "eqc_04_arrival.png" }
         ],
         roadPath: [
             [36.99255, 126.36955], [36.9927453, 126.3702343], [36.9928481, 126.3710604],
             [36.9929081, 126.371967], [36.9930495, 126.3728628], [36.9934442, 126.3742076],
             [36.993637, 126.3746313], [36.9945, 126.37458], [36.995415, 126.3743202],
             [36.9963011, 126.3741301], [36.9973422, 126.3738673], [36.9986419, 126.3735629],
-            [36.9999166, 126.3732777]
+            [36.9999166, 126.3732777], [37.0000917, 126.3743481], [37.0002472, 126.3755236],
+            [37.0004657, 126.3772992], [37.0005555, 126.3772777], [37.0010704, 126.377139],
+            [37.0013888, 126.3770277]
         ]
     },
-    // ⭐ 3단지 설비 자재 창고
     'EQ_COMP3': {
         stages: [
             { name: "남문 (출발)", lat: 36.993611, lon: 126.388722, radius: 50, speedLimit: "20km", nextTitle: "👉 1단계: 3단지 설비 자재 창고 진입", nextText: "남문 진입 후 바로 **우회전**하여 조금만 이동하시면 목적지입니다.", nextImg: "eq3_01_arrival.png" },
@@ -477,15 +472,14 @@ const factoryData = {
             [36.9937895, 126.3885494], [36.9939202, 126.3885843], [36.9940277, 126.3886111]
         ]
     },
-    // 💡 기존 공장(RAW/원부자재관리실) 원복 완료 (raw_room, raw_main, raw_left, raw_straight, raw_arrival)
     'RAW': {
         stages: [
-            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 방면 이동", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **우회전**하세요.", nextImg: "raw_room.png" },
-            { name: "방재실 (우회전)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 본관 방면 이동", nextText: "방재실 사거리에서 우회전 하셨습니다. 다음 교차로인 **본관 앞에서는 직진**하세요.", nextImg: "raw_main.png" },
-            { name: "본관 앞 (직진)", lat: 36.9969500, lon: 126.3803000, radius: 50, speedLimit: "20km", nextTitle: "👉 3단계: 플레어스택 다리 방면 이동", nextText: "본관 앞을 지납니다. 지금부터는 공정 구역이므로 **20km/h로 감속** 하세요. 전방 **플레어스택 다리 앞에서 좌회전**을 준비하세요.", nextImg: "raw_left.png" },
-            { name: "플레어스택 다리 앞 (좌회전)", lat: 36.9964600, lon: 126.3838100, radius: 40, speedLimit: "15km", nextTitle: "👉 4단계: 차량 정비 창고 직진", nextText: "좌회전하셨습니다. 15km 이하로 속도를 줄이고 **차량 정비 창고 앞을 지나 계속 직진**하세요.", nextImg: "raw_straight.png" },
-            { name: "차량 정비 창고 앞 (직진)", lat: 37.0008096, lon: 126.3870607, radius: 40, speedLimit: "15km", nextTitle: "🏁 5단계: 원부자재 관리실 도착 준비", nextText: "정비 창고 앞을 지납니다. 곧 목적지인 **원부자재 관리실**이 나타납니다.", nextImg: "raw_arrival.png" },
-            { name: "원부자재 관리실 (도착)", lat: 37.0024200, lon: 126.3855400, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "원부자재 관리실에 안전하게 도착했습니다!", nextImg: "raw_arrival.png" }
+            { name: "서문 (출발)", lat: 36.9925556, lon: 126.3695556, radius: 50, speedLimit: "35km", nextTitle: "👉 1단계: 방재실 사거리 우회전", nextText: "서문 보안실을 통과하셨습니다. 정면에 보이는 **방재실 사거리 교차로**에서 **우회전**하세요.", nextImg: "raw_room.png" },
+            { name: "방재실 (우회전)", lat: 36.9945000, lon: 126.3745833, radius: 50, speedLimit: "35km", nextTitle: "👉 2단계: 본관 전방 교차로 직진", nextText: "방재실 사거리에서 우회전 하셨습니다. 다음 교차로인 **본관 앞에서는 직진**하세요.", nextImg: "raw_main.png" },
+            { name: "본관 앞 (직진)", lat: 36.9969500, lon: 126.3803000, radius: 50, speedLimit: "20km", nextTitle: "👉 3단계: 플레어스택 교량 좌회전", nextText: "본관 앞을 통과합니다. 고위험 공정 내부 구역이므로 **시속 20km 이하로 감속**하고 전방 **플레어스택 다리 앞에서 좌회전** 하세요.", nextImg: "raw_left.png" },
+            { name: "플레어스택 다리 앞 (좌회전)", lat: 36.9964600, lon: 126.3838100, radius: 40, speedLimit: "15km", nextTitle: "👉 4단계: 사내 정비 창고 통과", nextText: "좌회전 처리가 완료되었습니다. 안전계수를 높이고 **차량 정비 창고 우측 통로를 경유해 전방으로 직진**하세요.", nextImg: "raw_straight.png" },
+            { name: "차량 정비 창고 앞 (직진)", lat: 37.0008096, lon: 126.3870607, radius: 40, speedLimit: "15km", nextTitle: "🏁 5단계: 원부자재 관리실 하차 구역 진입", nextText: "정비공장 측면 통로 통과 중입니다. 잠시 후 종착지인 **원부자재 관리실** 도크 셔터 앞에 정차하십시오.", nextImg: "raw_arrival.png" },
+            { name: "원부자재 관리실 (도착)", lat: 37.0024200, lon: 126.3855400, radius: 30, speedLimit: "15km", nextTitle: "🏁 운행 종료", nextText: "원부자재 관리실에 최종 도달하였습니다. 인계서 인수를 확인해 주세요.", nextImg: "raw_arrival.png" }
         ],
         roadPath: [
             [36.9925556, 126.3695556], [36.9926475, 126.3697772], [36.9927503, 126.3700025], [36.9928146, 126.3702600], [36.9928489, 126.3705014],
